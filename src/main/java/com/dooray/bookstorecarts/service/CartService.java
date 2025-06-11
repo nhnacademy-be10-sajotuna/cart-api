@@ -18,6 +18,7 @@ import java.util.List;
 public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final CartItemService cartItemService;
 
     public Cart saveCart(Cart cart){
         if (cart.getUserId() !=0 && cartRepository.existsByUserId(cart.getUserId())){
@@ -55,6 +56,7 @@ public class CartService {
         if (cart == null) {
             throw new InvalidException("삭제할 카트가 null 입니다.");
         }
+        cartItemService.deleteCartItem(cart.getId());
         cartRepository.delete(cart);
     }
 
@@ -70,6 +72,7 @@ public class CartService {
             if (existingItem != null) {
                 existingItem.setQuantity(existingItem.getQuantity() + sessionItem.getQuantity());
                 cartItemRepository.save(existingItem);
+                cartItemService.deleteCartItem(sessionItem.getId());
             }else{
                 sessionItem.setCart(userCart);
                 cartItemRepository.save(sessionItem);

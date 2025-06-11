@@ -1,0 +1,67 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+### 카트생성(회원)
+POST http://localhost:10370/api/carts
+Content-Type: application/json
+Accept: application/json
+
+{
+  "userId": 123
+}
+
+### 카트생성(비회원)
+POST http://localhost:10370/api/carts
+Content-Type: application/json
+Accept: application/json
+
+{
+  "sessionId": "session"
+}
+
+### 카트 조회(회원)
+GET http://localhost:10370/api/carts?userId=123
+
+### 카트 조회(비회원)
+GET http://localhost:10370/api/carts?sessionId=session
+
+### 카트 삭제
+DELETE http://localhost:10370/api/carts/1
+
+### 카트 병합
+POST http://localhost:10370/api/carts/merge
+Content-Type: application/json
+Accept: application/json
+
+{
+  "userId": 123,
+  "sessionId": "session"
+}
+
+
+### 카트 아이템 생성(한 종류의 책이 몇권있는지, 장바구니 안에는 여러종류의 책이 들어갈수 있으므로)
+POST http://localhost:10370/api/cart-items/2
+Content-Type: application/json
+Accept: application/json
+
+{
+  "bookId": 3,
+  "quantity": 3
+}
+
+### 카트 아이템 조회
+GET http://localhost:10370/api/cart-items/1
+
+### 책 수량 변경
+PATCH http://localhost:10370/api/cart-items/2
+Content-Type: application/json
+Accept: application/json
+
+{
+  "bookId": 2,
+  "quantity": 3
+}
+
+### 카트 아이템 삭제
+DELETE http://localhost:10370/api/cart-items/1

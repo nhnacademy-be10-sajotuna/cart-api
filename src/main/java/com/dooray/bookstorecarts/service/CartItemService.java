@@ -47,8 +47,13 @@ public class CartItemService {
         return cartItemRepository.findByCart(cart);
     }
 
-    public CartItem updateQuantity(int cartItemId, int quantity) {
+    public CartItem updateQuantity(int cartItemId, int quantity, int bookId) {
         CartItem cartItem = getCartItem(cartItemId);
+
+        if (cartItem.getBookId() != bookId) {
+            throw new InvalidException("요청한 bookId와 해당 cartItem 의 bookId가 일치하지 않습니다.");
+        }
+
         if (quantity <= 0) throw new InvalidException("수량은 0보다 커야합니다. ");
         cartItem.setQuantity(quantity);
         return cartItemRepository.save(cartItem);
