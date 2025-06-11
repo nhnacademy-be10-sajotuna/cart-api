@@ -37,7 +37,7 @@ eureka:
       enabled: true
   instance:
     prefer-ip-address: true
-    instance-id: ${spring.application.name}:${server.port}
+    instance-id: ${cart-api}:${10370}
 
 management:
   endpoints:
