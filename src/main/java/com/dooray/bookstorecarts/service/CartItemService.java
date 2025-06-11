@@ -48,6 +48,9 @@ public class CartItemService {
     }
 
     public CartItem updateQuantity(int cartItemId, int quantity, int bookId) {
+        if (!cartItemRepository.existsById(cartItemId)) {
+            throw new CartItemNotFoundException(cartItemId);
+        }
         CartItem cartItem = getCartItem(cartItemId);
 
         if (cartItem.getBookId() != bookId) {
@@ -64,5 +67,13 @@ public class CartItemService {
             throw new CartItemNotFoundException(cartItemId);
         }
         cartItemRepository.deleteById(cartItemId);
+    }
+
+    public void deleteAllCartItemsByCartId(int cartId) {
+        List<CartItem> items = getCartItemsByCartId(cartId);
+        if (items.isEmpty()) {
+            throw new CartItemNotFoundException();
+        }
+        cartItemRepository.deleteAll(items);
     }
 }

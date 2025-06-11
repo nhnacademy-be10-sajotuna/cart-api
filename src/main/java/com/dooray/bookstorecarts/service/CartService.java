@@ -56,7 +56,7 @@ public class CartService {
         if (cart == null) {
             throw new InvalidException("삭제할 카트가 null 입니다.");
         }
-        cartItemService.deleteCartItem(cart.getId());
+        cartItemService.deleteAllCartItemsByCartId(cart.getId());
         cartRepository.delete(cart);
     }
 

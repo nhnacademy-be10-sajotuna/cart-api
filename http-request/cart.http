@@ -41,7 +41,7 @@ Accept: application/json
 
 
 ### 카트 아이템 생성(한 종류의 책이 몇권있는지, 장바구니 안에는 여러종류의 책이 들어갈수 있으므로)
-POST http://localhost:10370/api/cart-items/2
+POST http://localhost:10370/api/cart-items/1
 Content-Type: application/json
 Accept: application/json
 
@@ -54,7 +54,7 @@ Accept: application/json
 GET http://localhost:10370/api/cart-items/1
 
 ### 책 수량 변경
-PATCH http://localhost:10370/api/cart-items/2
+PATCH http://localhost:10370/api/cart-items/1
 Content-Type: application/json
 Accept: application/json
 
