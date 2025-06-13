@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 public class CartItemNotFoundException extends ApiException {
     private static final String MESSAGE = "카트아이디가 존재하지 않습니다 : ";
 
-    public CartItemNotFoundException(int cartItemId) {
+    public CartItemNotFoundException(Long cartItemId) {
         super(HttpStatus.NOT_FOUND.value(), MESSAGE+ cartItemId);
     }
 

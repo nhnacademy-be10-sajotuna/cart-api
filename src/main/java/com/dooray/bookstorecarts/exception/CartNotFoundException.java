@@ -11,7 +11,7 @@ public class CartNotFoundException extends ApiException {
         super(HttpStatus.NOT_FOUND.value(), MESSAGE+ sessionId);
     }
 
-    public CartNotFoundException(int userId) {
+    public CartNotFoundException(Long userId) {
         super(HttpStatus.NOT_FOUND.value(), MESSAGE+ userId);
     }
 }

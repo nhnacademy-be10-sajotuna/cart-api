@@ -11,7 +11,7 @@ public class CartAlreadyExistsException extends ApiException {
         super(HttpStatus.CONFLICT.value(), MESSAGE+ sessionId);
     }
 
-    public CartAlreadyExistsException(int userId) {
+    public CartAlreadyExistsException(Long userId) {
         super(HttpStatus.CONFLICT.value(), MESSAGE+ userId);
     }
 }

@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartItemRequest {
-    private int bookId;
-    private int quantity;
+    private Long bookId;
+    private Long quantity;
 }
