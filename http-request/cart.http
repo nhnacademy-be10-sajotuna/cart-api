@@ -8,37 +8,17 @@ Accept: application/json
 Content-Type: application/json
 X-User-Id: 22
 
-### 카트생성(비회원)
-POST http://localhost:10370/api/carts
-
 ### 카트 조회(회원)
 GET http://localhost:10370/api/carts
 Accept: application/json
 Content-Type: application/json
 X-User-Id: 22
 
-### 카트 조회(비회원)
-GET http://localhost:10370/api/carts
-
-
 ### 카트 삭제(회원)
 DELETE http://localhost:10370/api/carts/cart/1
 
-### 카트 삭제(비회원) 카트삭제할때 잘못된 세션아이디 넣을시 예외처리
-DELETE http://localhost:10370/api/carts/guest-cart/cdb0d1db-685b-4f78-8a24-0f3635a0b385
-
-
 ### 카트 아이템 생성(회원)
 POST http://localhost:10370/api/cart-items/1
-Content-Type: application/json
-Accept: application/json
-
-{
-  "bookId": 2,
-  "quantity": 3
-}
-### 카트 아이템 생성(비회원)
-POST http://localhost:10370/api/cart-items
 Content-Type: application/json
 Accept: application/json
 
@@ -50,9 +30,6 @@ Accept: application/json
 ### 카트 아이템 조회(회원)
 GET http://localhost:10370/api/cart-items/cart/1
 
-### 카트 아이템 조회(비회원)
-GET http://localhost:10370/api/cart-items/guest-cart/2
-
 ### 책 수량 변경(회원)
 PATCH http://localhost:10370/api/cart-items/cart/1
 Content-Type: application/json
@@ -63,28 +40,14 @@ Accept: application/json
   "quantity": 5
 }
 
-### 책 수량 변경(비회원)
-PATCH http://localhost:10370/api/cart-items/guest-cart/1
+### 카트 아이템 삭제(회원)
+DELETE http://localhost:10370/api/cart-items/cart/3
+
+#### 카트 병합
+POST http://localhost:10370/api/carts/merge
 Content-Type: application/json
 Accept: application/json
 
 {
-  "bookId": 2,
-  "quantity": 5
+  "userId": 22
 }
-
-### 카트 아이템 삭제(회원)
-DELETE http://localhost:10370/api/cart-items/cart/1
-
-### 카트 아이템 삭제(비회원)
-DELETE http://localhost:10370/api/cart-items/guest-cart/1
-
-#### 카트 병합
-#POST http://localhost:10370/api/carts/merge
-#Content-Type: application/json
-#Accept: application/json
-#
-#{
-#  "userId": 123,
-#  "sessionId": "session"
-#}

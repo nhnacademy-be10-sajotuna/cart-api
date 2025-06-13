@@ -24,21 +24,12 @@ public class GuestCartService {
         }
 
         GuestCart guestCart = new GuestCart(sessionId, new ArrayList<>());
-
-        try{
             return guestCartRepository.save(guestCart);
-        } catch (JsonProcessingException e) {
-            throw new GuestCartSaveException("GuestCart 저장 중 오류 발생"+ e.getMessage());
-        }
     }
 
     public GuestCart getCartBySessionId(String sessionId) {   // 세션 아이디로 비회원카트 반환
-        try{
-            return Optional.ofNullable(guestCartRepository.findBySessionId(sessionId))
-                    .orElseThrow(() -> new CartNotFoundException(sessionId));
-        } catch (JsonProcessingException e) {
-            throw new GuestCartReadException("GuestCart JSON 파싱 중 오류 발생"+ e.getMessage());
-        }
+        return guestCartRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new CartNotFoundException(sessionId));
     }
 
     public void deleteGuestCart(String sessionId) {

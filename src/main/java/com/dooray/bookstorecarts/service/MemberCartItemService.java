@@ -8,6 +8,7 @@ import com.dooray.bookstorecarts.exception.InvalidException;
 import com.dooray.bookstorecarts.repository.MemberCartItemRepository;
 import com.dooray.bookstorecarts.repository.MemberCartRepository;
 import com.dooray.bookstorecarts.request.CartItemRequest;
+import com.dooray.bookstorecarts.response.MemberCartItemResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,26 +20,27 @@ public class MemberCartItemService {
     private final MemberCartRepository memberCartRepository;
     private final MemberCartItemRepository memberCartItemRepository;
 
-    public CartItem createMemberCartItem(Long cartId, CartItemRequest request) {
+    public MemberCartItemResponse createMemberCartItem(Long cartId, CartItemRequest request) {
         Cart cart = memberCartRepository.findById(cartId)
                 .orElseThrow(() -> new CartNotFoundException(cartId));
 // 예를 들어 유저 임동혁의 장바구니에 같은종류의 책이있으면 수량증가만 시키고 아니면 새로운 카트아이템 객체 생성
         CartItem existingItem = memberCartItemRepository.findByCartAndBookId(cart, request.getBookId());
         if (existingItem != null) {
             existingItem.setQuantity(existingItem.getQuantity() + request.getQuantity());
-            return memberCartItemRepository.save(existingItem);
+            return new MemberCartItemResponse(memberCartItemRepository.save(existingItem));
         }
 
         CartItem newCartItem = new CartItem();
         newCartItem.setBookId(request.getBookId());
         newCartItem.setQuantity(request.getQuantity());
         newCartItem.setCart(cart);
-        return memberCartItemRepository.save(newCartItem);
+        return new MemberCartItemResponse(memberCartItemRepository.save(newCartItem));
     }
 
-    public CartItem getCartItemByCartItemId(Long cartItemId) {
-        return memberCartItemRepository.findById(cartItemId)
+    public MemberCartItemResponse getCartItemByCartItemId(Long cartItemId) {
+        CartItem cartItem = memberCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
+        return new MemberCartItemResponse(cartItem);
     }
 
     public List<CartItem> getCartItemsByCartId(Long cartId){
@@ -47,7 +49,7 @@ public class MemberCartItemService {
         return memberCartItemRepository.findByCart(cart);
     }
 
-    public CartItem updateQuantity(Long cartItemId, CartItemRequest request) {
+    public MemberCartItemResponse updateQuantity(Long cartItemId, CartItemRequest request) {
         CartItem cartItem = memberCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
 
@@ -57,7 +59,8 @@ public class MemberCartItemService {
 
         if (request.getQuantity() <= 0) throw new InvalidException("수량은 0보다 커야합니다.");
         cartItem.setQuantity(request.getQuantity());
-        return memberCartItemRepository.save(cartItem);
+        CartItem updatedCartItem = memberCartItemRepository.save(cartItem);
+        return new MemberCartItemResponse(updatedCartItem);
     }
 
     public void deleteCartItem(Long cartItemId) {
