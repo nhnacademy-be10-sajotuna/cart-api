@@ -1,5 +1,6 @@
 server:
-  port: {PORT:10370}
+
+  port: ${PORT:10370}
 
 spring:
   application:
@@ -9,6 +10,12 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
   data:
     redis:
       database: 315
