@@ -2,29 +2,26 @@
 GET https://examples.http-client.intellij.net/get
     ?generated-in=IntelliJ IDEA
 
-### 카트생성(비회원)
-POST http://localhost:10370/api/guest-carts
-
-### 카트 조회(비회원)
+### 장바구니 조회(비회원 장바구니 조회 - 모든 아이템 조회)
 GET http://localhost:10370/api/guest-carts
 
-### 카트 삭제(비회원) 카트삭제할때 잘못된 세션아이디 넣을시 예외처리
+### 비회원 장바구니 수동삭제(레디스에서 자동삭제되게 하였지만 혹시나 필요할경우 사용)
 DELETE http://localhost:10370/api/guest-carts
 
-### 카트 아이템 생성(비회원)
+### 비회원 장바구니에 책담기(해당세션의 장바구니가 없을경우 장바구니 생성)
 POST http://localhost:10370/api/guest-cart-items
 Content-Type: application/json
 Accept: application/json
 
 {
-  "bookId": 3,
+  "bookId": 2,
   "quantity": 3
 }
 
-### 카트 아이템 조회(비회원)
+### 비회원 장바구니 책 단건조회
 GET http://localhost:10370/api/guest-cart-items/2
 
-### 책 수량 변경(비회원)
+### 비회원 장바구니 책 수량 변경
 PATCH http://localhost:10370/api/guest-cart-items/1
 Content-Type: application/json
 Accept: application/json
@@ -34,5 +31,8 @@ Accept: application/json
   "quantity": 5
 }
 
-### 카트 아이템 삭제(비회원)
+### 비회원 장바구니 책 삭제(단건 삭제)
 DELETE http://localhost:10370/api/guest-cart-items/1
+
+### 비회원 장바구니 비우기
+DELETE http://localhost:10370/api/guest-cart-items

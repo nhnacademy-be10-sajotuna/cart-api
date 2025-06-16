@@ -14,21 +14,15 @@ import org.springframework.web.bind.annotation.*;
 public class GuestCartController {
     private final GuestCartService guestCartService;
 
-    @PostMapping
-    public ResponseEntity<GuestCartResponse> createGuestCart(HttpServletRequest request) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(guestCartService.createGuestCart(getSessionId(request)));
-    }
-
+    // 장바구니 조회(비회원 장바구니 조회 - 모든 아이템 조회)
     @GetMapping
     public ResponseEntity<GuestCartResponse> getGuestCart(HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(guestCartService.getCartBySessionId(getSessionId(request)));
     }
-
-    @DeleteMapping // 비회원 장바구니 삭제
+    // 비회원 장바구니 수동삭제(레디스에서 자동삭제되게 하였지만 혹시나 필요할경우 사용)
+    @DeleteMapping
     public ResponseEntity<Void> deleteGuestCart(HttpServletRequest request) {
         guestCartService.deleteGuestCart(getSessionId(request));
         return ResponseEntity.noContent().build();

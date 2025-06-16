@@ -12,22 +12,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/user-carts")
 public class UserCartController {
     private final UserCartService userCartService;
-
-    @PostMapping
-    public ResponseEntity<UserCartResponse> createUserCart(@RequestHeader(value = "X-User-Id", required = false)Long userId){
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(userCartService.createUserCart(userId));
-    }
-
+    // 장바구니 조회(유저의 장바구니 조회 - 모든 아이템 조회)
     @GetMapping
-    public ResponseEntity<UserCartResponse> getUserCart(@RequestHeader(value = "X-User-Id", required = false) Long userId){
+    public ResponseEntity<UserCartResponse> getUserCart(@RequestHeader(value = "X-User-Id") Long userId){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userCartService.getCartByUserId(userId));
     }
-
-    @DeleteMapping("/{cartId}")  // 회원 장바구니 삭제
+    // 장바구니 완전삭제(유저가 회원탈퇴할때 카트가 db에 남지 않도록)
+    @DeleteMapping("/{cartId}")
     public ResponseEntity<Void> deleteUserCart(@PathVariable Long cartId) {
         userCartService.deleteUserCart(cartId);
         return ResponseEntity.noContent().build();

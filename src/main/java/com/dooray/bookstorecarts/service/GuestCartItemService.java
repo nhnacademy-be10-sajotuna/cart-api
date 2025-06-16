@@ -84,4 +84,11 @@ public class GuestCartItemService {
             guestCartRepository.save(guestCart);
         });
     }
+
+    public void deleteAllGuestCartItems(String sessionId) {
+        guestCartRepository.findBySessionId(sessionId).ifPresent(guestCart -> {
+            guestCart.getItems().clear();
+            guestCartRepository.save(guestCart);
+        });
+    }
 }

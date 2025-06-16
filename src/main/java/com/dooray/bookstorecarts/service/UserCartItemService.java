@@ -20,9 +20,13 @@ public class UserCartItemService {
     private final UserCartRepository userCartRepository;
     private final UserCartItemRepository userCartItemRepository;
 
-    public UserCartItemResponse createUserCartItem(Long cartId, CartItemRequest request) {
-        Cart cart = userCartRepository.findById(cartId)
-                .orElseThrow(() -> new CartNotFoundException(cartId));
+    public UserCartItemResponse createUserCartItem(Long userId, CartItemRequest request) {
+        Cart cart = userCartRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUserId(userId);
+                    return userCartRepository.save(newCart);
+                });
 // 예를 들어 유저 임동혁의 장바구니에 같은종류의 책이있으면 수량증가만 시키고 아니면 새로운 카트아이템 객체 생성
         CartItem existingItem = userCartItemRepository.findByCartAndBookId(cart, request.getBookId());
         if (existingItem != null) {
@@ -49,6 +53,12 @@ public class UserCartItemService {
         return userCartItemRepository.findByCart(cart);
     }
 
+    public List<CartItem> getCartItemsByUserId(Long userId){
+        Cart cart = userCartRepository.findByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException(userId));
+        return userCartItemRepository.findByCart(cart);
+    }
+
     public UserCartItemResponse updateQuantity(Long cartItemId, CartItemRequest request) {
         CartItem cartItem = userCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
@@ -70,8 +80,13 @@ public class UserCartItemService {
     }
 
     // 카트에 있는 모든 카트 아이템 삭제(장바구니 비우기)
-    public void deleteAllCartItemsFromCart(Long cartId) {
+    public void deleteAllCartItemsFromCartId(Long cartId) {
         List<CartItem> items = getCartItemsByCartId(cartId);
+        userCartItemRepository.deleteAll(items);
+    }
+
+    public void deleteAllCartItemsFromUserId(Long userId) {
+        List<CartItem> items = getCartItemsByUserId(userId);
         userCartItemRepository.deleteAll(items);
     }
 }

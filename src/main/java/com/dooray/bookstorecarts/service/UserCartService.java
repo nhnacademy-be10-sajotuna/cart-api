@@ -19,15 +19,6 @@ public class UserCartService {
     private final UserCartItemService userCartItemService;
     private final UserCartItemRepository userCartItemRepository;
 
-    public UserCartResponse createUserCart(Long userId){       // 회원 카트 생성(db 저장)
-        if (userCartRepository.existsByUserId(userId)){
-            throw new CartAlreadyExistsException(userId);
-        }
-        Cart newCart = new Cart();
-        newCart.setUserId(userId);
-        List<CartItem> emptyItems = List.of();
-        return new UserCartResponse(userCartRepository.save(newCart), emptyItems);
-    }
 
     public UserCartResponse getCartByUserId(Long userId) {    // 유저 아이디로 회원카트 반환
         Cart cart = userCartRepository.findByUserId(userId)
@@ -44,7 +35,7 @@ public class UserCartService {
 
     public void deleteUserCart(Long cartId) {
         Cart cart = getCartByCartId(cartId);
-        userCartItemService.deleteAllCartItemsFromCart(cart.getId());  // 장바구니에 비우고 카트 삭제
+        userCartItemService.deleteAllCartItemsFromCartId(cart.getId());  // 장바구니에 비우고 카트 삭제
         userCartRepository.delete(cart);
     }
 }

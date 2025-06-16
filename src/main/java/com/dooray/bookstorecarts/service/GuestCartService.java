@@ -15,15 +15,6 @@ import java.util.ArrayList;
 public class GuestCartService {
     private final GuestCartRepository guestCartRepository;
 
-    public GuestCartResponse createGuestCart(String sessionId){  // 비회원 카트 생성(레디스 저장)
-        if(guestCartRepository.existsBySessionId(sessionId)){
-            throw new CartAlreadyExistsException(sessionId);
-        }
-
-        GuestCart guestCart = new GuestCart(sessionId, new ArrayList<>());
-            return new GuestCartResponse(guestCartRepository.save(guestCart));
-    }
-
     public GuestCartResponse getCartBySessionId(String sessionId) {   // 세션 아이디로 비회원카트 반환
         GuestCart guestCart = guestCartRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new CartNotFoundException(sessionId));
