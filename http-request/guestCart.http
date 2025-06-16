@@ -9,7 +9,7 @@ POST http://localhost:10370/api/guest-carts
 GET http://localhost:10370/api/guest-carts
 
 ### 카트 삭제(비회원) 카트삭제할때 잘못된 세션아이디 넣을시 예외처리
-DELETE http://localhost:10370/api/guest-carts/f623d57d-e66f-43e8-b28a-26989f67c194
+DELETE http://localhost:10370/api/guest-carts
 
 ### 카트 아이템 생성(비회원)
 POST http://localhost:10370/api/guest-cart-items

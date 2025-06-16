@@ -28,9 +28,9 @@ public class GuestCartController {
                 .body(guestCartService.getCartBySessionId(getSessionId(request)));
     }
 
-    @DeleteMapping("/{sessionId}") // 비회원 장바구니 삭제
-    public ResponseEntity<Void> deleteGuestCart(@PathVariable String sessionId) {
-        guestCartService.deleteGuestCart(sessionId);
+    @DeleteMapping // 비회원 장바구니 삭제
+    public ResponseEntity<Void> deleteGuestCart(HttpServletRequest request) {
+        guestCartService.deleteGuestCart(getSessionId(request));
         return ResponseEntity.noContent().build();
     }
 
