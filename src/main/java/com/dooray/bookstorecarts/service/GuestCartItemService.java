@@ -6,7 +6,7 @@ import com.dooray.bookstorecarts.redisdto.GuestCartItem;
 import com.dooray.bookstorecarts.repository.GuestCartRepository;
 import com.dooray.bookstorecarts.request.CartItemRequest;
 import com.dooray.bookstorecarts.response.GuestCartItemResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +18,7 @@ import java.util.List;
 public class GuestCartItemService {
     private final GuestCartRepository guestCartRepository;
 
+    @Transactional
     public GuestCartItemResponse createGuestCartItem(String sessionId, CartItemRequest request) {
             GuestCart guestCart = guestCartRepository.findBySessionId(sessionId)
                     .orElseGet(() -> new GuestCart(sessionId, new ArrayList<>()));
@@ -58,6 +59,7 @@ public class GuestCartItemService {
                 .orElse(List.of());
     }
 
+    @Transactional
     public GuestCartItemResponse updateQuantity(String sessionId, CartItemRequest request) {
             GuestCart guestCart = guestCartRepository.findBySessionId(sessionId)
                     .orElseThrow(() -> new CartNotFoundException(sessionId));
@@ -78,10 +80,17 @@ public class GuestCartItemService {
 
             return new GuestCartItemResponse(guestCartItem);
     }
-
+    @Transactional
     public void deleteGuestCartItem(String sessionId, Long bookId) {
         guestCartRepository.findBySessionId(sessionId).ifPresent(guestCart -> {
             guestCart.getItems().removeIf(item -> item.getBookId().equals(bookId));
+            guestCartRepository.save(guestCart);
+        });
+    }
+    @Transactional
+    public void deleteAllGuestCartItems(String sessionId) {
+        guestCartRepository.findBySessionId(sessionId).ifPresent(guestCart -> {
+            guestCart.getItems().clear();
             guestCartRepository.save(guestCart);
         });
     }

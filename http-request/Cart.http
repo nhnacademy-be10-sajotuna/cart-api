@@ -1,0 +1,9 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+#### 장바구니 병합
+POST http://localhost:10370/api/carts/merge
+Content-Type: application/json
+Accept: application/json
+X-User-Id: 22

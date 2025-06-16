@@ -8,17 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class MemberCartResponse {
+public class UserCartResponse {
     private Long cartId;
     private Long userId;
-    private List<MemberCartItemResponse> items = new ArrayList<>();
+    private List<UserCartItemResponse> items = new ArrayList<>();
 
-    public MemberCartResponse(Cart cart, List<CartItem> items) {
+    public UserCartResponse(Cart cart, List<CartItem> items) {
         this.cartId = cart.getId();
         this.userId = cart.getUserId();
 
         for(CartItem cartItem : items) {
-            this.items.add(new MemberCartItemResponse(cartItem));
+            this.items.add(new UserCartItemResponse(cartItem));
         }
     }
 }
