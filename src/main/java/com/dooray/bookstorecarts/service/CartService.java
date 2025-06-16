@@ -10,6 +10,7 @@ import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
 import com.dooray.bookstorecarts.response.GuestCartResponse;
 import com.dooray.bookstorecarts.response.UserCartResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ public class CartService {
     private final UserCartItemRepository userCartItemRepository;
     private final GuestCartRepository guestCartRepository;
 
+    @Transactional
     public UserCartResponse mergeCarts(Long userId, String sessionId) {
         GuestCart guestCart = guestCartRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new CartNotFoundException(sessionId));

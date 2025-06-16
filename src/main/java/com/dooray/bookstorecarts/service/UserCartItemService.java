@@ -9,6 +9,7 @@ import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
 import com.dooray.bookstorecarts.request.CartItemRequest;
 import com.dooray.bookstorecarts.response.UserCartItemResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,7 @@ import java.util.List;
 public class UserCartItemService {
     private final UserCartRepository userCartRepository;
     private final UserCartItemRepository userCartItemRepository;
-
+    @Transactional
     public UserCartItemResponse createUserCartItem(Long userId, CartItemRequest request) {
         Cart cart = userCartRepository.findByUserId(userId)
                 .orElseGet(() -> {
@@ -58,7 +59,7 @@ public class UserCartItemService {
                 .orElseThrow(() -> new CartNotFoundException(userId));
         return userCartItemRepository.findByCart(cart);
     }
-
+    @Transactional
     public UserCartItemResponse updateQuantity(Long cartItemId, CartItemRequest request) {
         CartItem cartItem = userCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
@@ -72,7 +73,7 @@ public class UserCartItemService {
         CartItem updatedCartItem = userCartItemRepository.save(cartItem);
         return new UserCartItemResponse(updatedCartItem);
     }
-
+    @Transactional
     public void deleteCartItem(Long cartItemId) {
         CartItem cartItem = userCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
@@ -80,11 +81,13 @@ public class UserCartItemService {
     }
 
     // 카트에 있는 모든 카트 아이템 삭제(장바구니 비우기)
+    @Transactional
     public void deleteAllCartItemsFromCartId(Long cartId) {
         List<CartItem> items = getCartItemsByCartId(cartId);
         userCartItemRepository.deleteAll(items);
     }
 
+    @Transactional
     public void deleteAllCartItemsFromUserId(Long userId) {
         List<CartItem> items = getCartItemsByUserId(userId);
         userCartItemRepository.deleteAll(items);

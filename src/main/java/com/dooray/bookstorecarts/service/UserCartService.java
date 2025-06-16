@@ -7,6 +7,7 @@ import com.dooray.bookstorecarts.exception.CartNotFoundException;
 import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
 import com.dooray.bookstorecarts.response.UserCartResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ public class UserCartService {
         return userCartRepository.findById(cartId)
                 .orElseThrow(() -> new CartNotFoundException(cartId));
     }
-
+    @Transactional
     public void deleteUserCart(Long cartId) {
         Cart cart = getCartByCartId(cartId);
         userCartItemService.deleteAllCartItemsFromCartId(cart.getId());  // 장바구니에 비우고 카트 삭제

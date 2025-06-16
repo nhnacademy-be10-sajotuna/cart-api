@@ -3,6 +3,7 @@ package com.dooray.bookstorecarts.controller;
 import com.dooray.bookstorecarts.request.CartItemRequest;
 import com.dooray.bookstorecarts.response.UserCartItemResponse;
 import com.dooray.bookstorecarts.service.UserCartItemService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ public class UserCartItemController {
     // 장바구니에 책담기(해당 유저의 장바구니가 없을경우 장바구니 생성)
     @PostMapping
     public ResponseEntity<UserCartItemResponse> createUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
-                                                                   @RequestBody CartItemRequest request) {
+                                                                   @Valid @RequestBody CartItemRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(userCartItemService.createUserCartItem(userId, request));
@@ -31,7 +32,7 @@ public class UserCartItemController {
     // 장바구니 책 수량 변경
     @PatchMapping("/{cartItemId}")
     public ResponseEntity<UserCartItemResponse> updateUserCartItem(@PathVariable Long cartItemId,
-                                                                   @RequestBody CartItemRequest request) {
+                                                                   @Valid @RequestBody CartItemRequest request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userCartItemService.updateQuantity(cartItemId, request));
