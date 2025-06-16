@@ -3,35 +3,35 @@ GET https://examples.http-client.intellij.net/get
     ?generated-in=IntelliJ IDEA
 
 ### 카트생성(회원)
-POST http://localhost:10370/api/carts
+POST http://localhost:10370/api/user-carts
 Accept: application/json
 Content-Type: application/json
 X-User-Id: 22
 
 ### 카트 조회(회원)
-GET http://localhost:10370/api/carts
+GET http://localhost:10370/api/user-carts
 Accept: application/json
 Content-Type: application/json
 X-User-Id: 22
 
 ### 카트 삭제(회원)
-DELETE http://localhost:10370/api/carts/cart/1
+DELETE http://localhost:10370/api/user-carts/1
 
 ### 카트 아이템 생성(회원)
-POST http://localhost:10370/api/cart-items/1
+POST http://localhost:10370/api/user-cart-items/1
 Content-Type: application/json
 Accept: application/json
 
 {
-  "bookId": 2,
+  "bookId": 3,
   "quantity": 3
 }
 
 ### 카트 아이템 조회(회원)
-GET http://localhost:10370/api/cart-items/cart/1
+GET http://localhost:10370/api/user-cart-items/3
 
 ### 책 수량 변경(회원)
-PATCH http://localhost:10370/api/cart-items/cart/1
+PATCH http://localhost:10370/api/user-cart-items/1
 Content-Type: application/json
 Accept: application/json
 
@@ -41,7 +41,7 @@ Accept: application/json
 }
 
 ### 카트 아이템 삭제(회원)
-DELETE http://localhost:10370/api/cart-items/cart/3
+DELETE http://localhost:10370/api/user-cart-items/3
 
 #### 카트 병합
 POST http://localhost:10370/api/carts/merge

@@ -5,10 +5,10 @@ import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.exception.CartItemNotFoundException;
 import com.dooray.bookstorecarts.exception.CartNotFoundException;
 import com.dooray.bookstorecarts.exception.InvalidException;
-import com.dooray.bookstorecarts.repository.MemberCartItemRepository;
-import com.dooray.bookstorecarts.repository.MemberCartRepository;
+import com.dooray.bookstorecarts.repository.UserCartItemRepository;
+import com.dooray.bookstorecarts.repository.UserCartRepository;
 import com.dooray.bookstorecarts.request.CartItemRequest;
-import com.dooray.bookstorecarts.response.MemberCartItemResponse;
+import com.dooray.bookstorecarts.response.UserCartItemResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,41 +16,41 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class MemberCartItemService {
-    private final MemberCartRepository memberCartRepository;
-    private final MemberCartItemRepository memberCartItemRepository;
+public class UserCartItemService {
+    private final UserCartRepository userCartRepository;
+    private final UserCartItemRepository userCartItemRepository;
 
-    public MemberCartItemResponse createMemberCartItem(Long cartId, CartItemRequest request) {
-        Cart cart = memberCartRepository.findById(cartId)
+    public UserCartItemResponse createUserCartItem(Long cartId, CartItemRequest request) {
+        Cart cart = userCartRepository.findById(cartId)
                 .orElseThrow(() -> new CartNotFoundException(cartId));
 // 예를 들어 유저 임동혁의 장바구니에 같은종류의 책이있으면 수량증가만 시키고 아니면 새로운 카트아이템 객체 생성
-        CartItem existingItem = memberCartItemRepository.findByCartAndBookId(cart, request.getBookId());
+        CartItem existingItem = userCartItemRepository.findByCartAndBookId(cart, request.getBookId());
         if (existingItem != null) {
             existingItem.setQuantity(existingItem.getQuantity() + request.getQuantity());
-            return new MemberCartItemResponse(memberCartItemRepository.save(existingItem));
+            return new UserCartItemResponse(userCartItemRepository.save(existingItem));
         }
 
         CartItem newCartItem = new CartItem();
         newCartItem.setBookId(request.getBookId());
         newCartItem.setQuantity(request.getQuantity());
         newCartItem.setCart(cart);
-        return new MemberCartItemResponse(memberCartItemRepository.save(newCartItem));
+        return new UserCartItemResponse(userCartItemRepository.save(newCartItem));
     }
 
-    public MemberCartItemResponse getCartItemByCartItemId(Long cartItemId) {
-        CartItem cartItem = memberCartItemRepository.findById(cartItemId)
+    public UserCartItemResponse getCartItemByCartItemId(Long cartItemId) {
+        CartItem cartItem = userCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
-        return new MemberCartItemResponse(cartItem);
+        return new UserCartItemResponse(cartItem);
     }
 
     public List<CartItem> getCartItemsByCartId(Long cartId){
-        Cart cart = memberCartRepository.findById(cartId)
+        Cart cart = userCartRepository.findById(cartId)
                 .orElseThrow(() -> new CartNotFoundException(cartId));
-        return memberCartItemRepository.findByCart(cart);
+        return userCartItemRepository.findByCart(cart);
     }
 
-    public MemberCartItemResponse updateQuantity(Long cartItemId, CartItemRequest request) {
-        CartItem cartItem = memberCartItemRepository.findById(cartItemId)
+    public UserCartItemResponse updateQuantity(Long cartItemId, CartItemRequest request) {
+        CartItem cartItem = userCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
 
         if (!cartItem.getBookId().equals(request.getBookId())) {
@@ -59,19 +59,19 @@ public class MemberCartItemService {
 
         if (request.getQuantity() <= 0) throw new InvalidException("수량은 0보다 커야합니다.");
         cartItem.setQuantity(request.getQuantity());
-        CartItem updatedCartItem = memberCartItemRepository.save(cartItem);
-        return new MemberCartItemResponse(updatedCartItem);
+        CartItem updatedCartItem = userCartItemRepository.save(cartItem);
+        return new UserCartItemResponse(updatedCartItem);
     }
 
     public void deleteCartItem(Long cartItemId) {
-        CartItem cartItem = memberCartItemRepository.findById(cartItemId)
+        CartItem cartItem = userCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
-        memberCartItemRepository.delete(cartItem);
+        userCartItemRepository.delete(cartItem);
     }
 
     // 카트에 있는 모든 카트 아이템 삭제(장바구니 비우기)
     public void deleteAllCartItemsFromCart(Long cartId) {
         List<CartItem> items = getCartItemsByCartId(cartId);
-        memberCartItemRepository.deleteAll(items);
+        userCartItemRepository.deleteAll(items);
     }
 }

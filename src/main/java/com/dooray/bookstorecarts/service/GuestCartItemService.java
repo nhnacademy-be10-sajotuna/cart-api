@@ -6,7 +6,6 @@ import com.dooray.bookstorecarts.redisdto.GuestCartItem;
 import com.dooray.bookstorecarts.repository.GuestCartRepository;
 import com.dooray.bookstorecarts.request.CartItemRequest;
 import com.dooray.bookstorecarts.response.GuestCartItemResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

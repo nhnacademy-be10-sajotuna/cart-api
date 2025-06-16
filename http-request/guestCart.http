@@ -3,16 +3,16 @@ GET https://examples.http-client.intellij.net/get
     ?generated-in=IntelliJ IDEA
 
 ### 카트생성(비회원)
-POST http://localhost:10370/api/carts
+POST http://localhost:10370/api/guest-carts
 
 ### 카트 조회(비회원)
-GET http://localhost:10370/api/carts
+GET http://localhost:10370/api/guest-carts
 
 ### 카트 삭제(비회원) 카트삭제할때 잘못된 세션아이디 넣을시 예외처리
-DELETE http://localhost:10370/api/carts/guest-cart/f623d57d-e66f-43e8-b28a-26989f67c194
+DELETE http://localhost:10370/api/guest-carts/f623d57d-e66f-43e8-b28a-26989f67c194
 
 ### 카트 아이템 생성(비회원)
-POST http://localhost:10370/api/cart-items
+POST http://localhost:10370/api/guest-cart-items
 Content-Type: application/json
 Accept: application/json
 
@@ -22,10 +22,10 @@ Accept: application/json
 }
 
 ### 카트 아이템 조회(비회원)
-GET http://localhost:10370/api/cart-items/guest-cart/2
+GET http://localhost:10370/api/guest-cart-items/2
 
 ### 책 수량 변경(비회원)
-PATCH http://localhost:10370/api/cart-items/guest-cart/1
+PATCH http://localhost:10370/api/guest-cart-items/1
 Content-Type: application/json
 Accept: application/json
 
@@ -35,4 +35,4 @@ Accept: application/json
 }
 
 ### 카트 아이템 삭제(비회원)
-DELETE http://localhost:10370/api/cart-items/guest-cart/1
+DELETE http://localhost:10370/api/guest-cart-items/1
