@@ -50,7 +50,7 @@ public class GuestCartItemService {
                     return new GuestCartItemResponse(item);
                 }
             }
-            throw new CartItemNotFoundException(BookId);
+            throw CartItemNotFoundException.forBookId(BookId);
     }
 
     public List<GuestCartItem> getGuestCartItemsBySessionId(String sessionId) {
@@ -63,7 +63,6 @@ public class GuestCartItemService {
     public GuestCartItemResponse updateQuantity(String sessionId, CartItemRequest request) {
             GuestCart guestCart = guestCartRepository.findBySessionId(sessionId)
                     .orElseThrow(() -> new CartNotFoundException(sessionId));
-            if (request.getQuantity() <= 0) throw new InvalidException("수량은 1 이상이어야 합니다.");
 
             GuestCartItem guestCartItem = null;
             for (GuestCartItem item : guestCart.getItems()) {
@@ -73,7 +72,7 @@ public class GuestCartItemService {
                 }
             }
 
-            if (guestCartItem == null) throw new CartItemNotFoundException();
+            if (guestCartItem == null) throw  CartItemNotFoundException.forBookId(request.getBookId());
 
             guestCartItem.setQuantity(request.getQuantity());
             guestCartRepository.save(guestCart);
@@ -82,10 +81,16 @@ public class GuestCartItemService {
     }
     @Transactional
     public void deleteGuestCartItem(String sessionId, Long bookId) {
-        guestCartRepository.findBySessionId(sessionId).ifPresent(guestCart -> {
-            guestCart.getItems().removeIf(item -> item.getBookId().equals(bookId));
-            guestCartRepository.save(guestCart);
-        });
+        GuestCart guestCart = guestCartRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new CartNotFoundException(sessionId));
+
+        boolean removed = guestCart.getItems().removeIf(item -> item.getBookId().equals(bookId));
+
+        if (!removed) {
+            throw CartItemNotFoundException.forBookId(bookId);
+        }
+
+        guestCartRepository.save(guestCart);
     }
     @Transactional
     public void deleteAllGuestCartItems(String sessionId) {

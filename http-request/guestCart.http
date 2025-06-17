@@ -14,7 +14,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "bookId": 2,
+  "bookId": 1,
   "quantity": 3
 }
 
@@ -22,17 +22,17 @@ Accept: application/json
 GET http://localhost:10370/api/guest-cart-items/2
 
 ### 비회원 장바구니 책 수량 변경
-PATCH http://localhost:10370/api/guest-cart-items/1
+PATCH http://localhost:10370/api/guest-cart-items
 Content-Type: application/json
 Accept: application/json
 
 {
-  "bookId": 1,
+  "bookId": 2,
   "quantity": 5
 }
 
 ### 비회원 장바구니 책 삭제(단건 삭제)
-DELETE http://localhost:10370/api/guest-cart-items/1
+DELETE http://localhost:10370/api/guest-cart-items/2
 
 ### 비회원 장바구니 비우기
 DELETE http://localhost:10370/api/guest-cart-items

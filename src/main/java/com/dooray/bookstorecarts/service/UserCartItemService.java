@@ -44,7 +44,7 @@ public class UserCartItemService {
 
     public UserCartItemResponse getCartItemByCartItemId(Long cartItemId) {
         CartItem cartItem = userCartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
+                .orElseThrow(() -> CartItemNotFoundException.forCartItemId(cartItemId));
         return new UserCartItemResponse(cartItem);
     }
 
@@ -62,7 +62,7 @@ public class UserCartItemService {
     @Transactional
     public UserCartItemResponse updateQuantity(Long cartItemId, CartItemRequest request) {
         CartItem cartItem = userCartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
+                .orElseThrow(() -> CartItemNotFoundException.forCartItemId(cartItemId));
 
         if (!cartItem.getBookId().equals(request.getBookId())) {
             throw new InvalidException("요청한 bookId와 해당 cartItem 의 bookId가 일치하지 않습니다.");
@@ -76,7 +76,7 @@ public class UserCartItemService {
     @Transactional
     public void deleteCartItem(Long cartItemId) {
         CartItem cartItem = userCartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
+                .orElseThrow(() -> CartItemNotFoundException.forCartItemId(cartItemId));
         userCartItemRepository.delete(cartItem);
     }
 
