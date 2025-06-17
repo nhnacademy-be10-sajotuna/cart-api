@@ -33,7 +33,7 @@ public class GuestCartItemController {
                 .body(guestCartItemService.getGuestCartItemByBookId(getSessionId(httpServletRequest), bookId));
     }
     // 비회원 장바구니 책 수량 변경
-    @PatchMapping("/{bookId}")
+    @PatchMapping
     public ResponseEntity<GuestCartItemResponse> updateGuestCartItem(@Valid @RequestBody CartItemRequest request,
                                                                      HttpServletRequest httpServletRequest) {
         return ResponseEntity
