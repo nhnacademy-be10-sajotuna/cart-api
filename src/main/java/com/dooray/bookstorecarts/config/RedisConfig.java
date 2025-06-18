@@ -1,6 +1,7 @@
 package com.dooray.bookstorecarts.config;
 
 import com.dooray.bookstorecarts.redisdto.GuestCart;
+import com.dooray.bookstorecarts.redisdto.RedisCartDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,11 +18,11 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, GuestCart> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, GuestCart> sessionRedisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, RedisCartDto> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, RedisCartDto> sessionRedisTemplate = new RedisTemplate<>();
         sessionRedisTemplate.setConnectionFactory(redisConnectionFactory);
 
-        Jackson2JsonRedisSerializer<GuestCart> serializer = new Jackson2JsonRedisSerializer<>(GuestCart.class);
+        Jackson2JsonRedisSerializer<RedisCartDto> serializer = new Jackson2JsonRedisSerializer<>(RedisCartDto.class);
         sessionRedisTemplate.setKeySerializer(new StringRedisSerializer());
         sessionRedisTemplate.setValueSerializer(serializer);
         sessionRedisTemplate.setHashKeySerializer(new StringRedisSerializer());

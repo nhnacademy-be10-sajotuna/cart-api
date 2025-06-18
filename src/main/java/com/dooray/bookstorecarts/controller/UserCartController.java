@@ -20,9 +20,9 @@ public class UserCartController {
                 .body(userCartService.getCartByUserId(userId));
     }
     // 장바구니 완전삭제(유저가 회원탈퇴할때 카트가 db에 남지 않도록)
-    @DeleteMapping("/{cartId}")
-    public ResponseEntity<Void> deleteUserCart(@PathVariable Long cartId) {
-        userCartService.deleteUserCart(cartId);
+    @DeleteMapping
+    public ResponseEntity<Void> deleteUserCart(@RequestHeader(value = "X-User-Id") Long userId) {
+        userCartService.deleteUserCart(userId);
         return ResponseEntity.noContent().build();
     }
 }

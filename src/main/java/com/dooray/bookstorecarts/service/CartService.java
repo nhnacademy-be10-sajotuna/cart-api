@@ -3,9 +3,11 @@ package com.dooray.bookstorecarts.service;
 import com.dooray.bookstorecarts.exception.*;
 import com.dooray.bookstorecarts.redisdto.GuestCart;
 import com.dooray.bookstorecarts.redisdto.GuestCartItem;
+import com.dooray.bookstorecarts.redisdto.RedisCartDto;
 import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.entity.Cart;
 import com.dooray.bookstorecarts.entity.CartItem;
+import com.dooray.bookstorecarts.repository.UserCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
 import com.dooray.bookstorecarts.response.UserCartResponse;
 import jakarta.servlet.http.HttpSession;
@@ -23,6 +25,7 @@ public class CartService {
     private final GuestCartService guestCartService;
     private final UserCartRepository userCartRepository;
     private final UserCartItemRepository userCartItemRepository;
+    private final UserCartRedisRepository userCartRedisRepository;
 
     @Transactional
     public UserCartResponse mergeCarts(Long userId, HttpSession session) {
@@ -49,7 +52,8 @@ public class CartService {
         }
         guestCartService.deleteGuestCart(session);
 
-        List<CartItem> items = userCartItemService.getCartItemsByCartId(cart.getId());
+        List<CartItem> items = userCartItemRepository.findByCart(cart);
+        userCartRedisRepository.save(RedisCartDto.from(cart, items));
         return new UserCartResponse(cart, items);
     }
 }
