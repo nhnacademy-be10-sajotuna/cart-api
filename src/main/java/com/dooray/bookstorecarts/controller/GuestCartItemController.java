@@ -3,12 +3,10 @@ package com.dooray.bookstorecarts.controller;
 import com.dooray.bookstorecarts.request.CartItemRequest;
 import com.dooray.bookstorecarts.response.GuestCartItemResponse;
 import com.dooray.bookstorecarts.service.GuestCartItemService;
-import com.dooray.bookstorecarts.service.GuestCartItemService1;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/guest-cart-items")
 public class GuestCartItemController {
-    private final GuestCartItemService1 guestCartItemService;
+    private final GuestCartItemService guestCartItemService;
     // 비회원 장바구니에 책담기(해당세션의 장바구니가 없을경우 장바구니 생성)
     @PostMapping
     public ResponseEntity<GuestCartItemResponse> createGuestCartItem(@Valid @RequestBody CartItemRequest request,

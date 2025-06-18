@@ -3,12 +3,10 @@ package com.dooray.bookstorecarts.service;
 import com.dooray.bookstorecarts.exception.*;
 import com.dooray.bookstorecarts.redisdto.GuestCart;
 import com.dooray.bookstorecarts.redisdto.GuestCartItem;
-import com.dooray.bookstorecarts.repository.GuestCartRepository;
 import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.entity.Cart;
 import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
-import com.dooray.bookstorecarts.response.GuestCartResponse;
 import com.dooray.bookstorecarts.response.UserCartResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +21,6 @@ public class CartService {
     private final UserCartItemService userCartItemService;
     private final UserCartRepository userCartRepository;
     private final UserCartItemRepository userCartItemRepository;
-    private final GuestCartRepository guestCartRepository;
 
     @Transactional
     public UserCartResponse mergeCarts(Long userId, String sessionId) {

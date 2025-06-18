@@ -2,7 +2,6 @@ package com.dooray.bookstorecarts.controller;
 
 import com.dooray.bookstorecarts.response.GuestCartResponse;
 import com.dooray.bookstorecarts.service.GuestCartService;
-import com.dooray.bookstorecarts.service.GuestCartService1;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/guest-carts")
 public class GuestCartController {
-    private final GuestCartService1 guestCartService;
+    private final GuestCartService guestCartService;
 
     // 장바구니 조회(비회원 장바구니 조회 - 모든 아이템 조회)
     @GetMapping
