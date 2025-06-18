@@ -14,7 +14,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "bookId": 1,
+  "bookId": 2,
   "quantity": 3
 }
 
@@ -27,7 +27,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "bookId": 2,
+  "bookId": 1,
   "quantity": 5
 }
 

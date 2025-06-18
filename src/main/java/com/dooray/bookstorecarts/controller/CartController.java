@@ -3,6 +3,7 @@ package com.dooray.bookstorecarts.controller;
 import com.dooray.bookstorecarts.response.UserCartResponse;
 import com.dooray.bookstorecarts.service.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,10 @@ public class CartController {
                                                        HttpServletRequest httpServletRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(cartService.mergeCarts(userId, getSessionId(httpServletRequest)));
+                .body(cartService.mergeCarts(userId, getSession(httpServletRequest)));
     }
 
-    private String getSessionId(HttpServletRequest request) {
-        return request.getSession().getId();
+    private HttpSession getSession(HttpServletRequest request) {
+        return request.getSession();
     }
 }
