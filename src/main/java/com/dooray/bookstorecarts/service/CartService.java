@@ -8,6 +8,7 @@ import com.dooray.bookstorecarts.entity.Cart;
 import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
 import com.dooray.bookstorecarts.response.UserCartResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,16 @@ import java.util.List;
 public class CartService {
 
     private final UserCartItemService userCartItemService;
+    private final GuestCartService guestCartService;
     private final UserCartRepository userCartRepository;
     private final UserCartItemRepository userCartItemRepository;
 
     @Transactional
-    public UserCartResponse mergeCarts(Long userId, String sessionId) {
-        GuestCart guestCart = guestCartRepository.findBySessionId(sessionId)
-                .orElseThrow(() -> new CartNotFoundException(sessionId));
+    public UserCartResponse mergeCarts(Long userId, HttpSession session) {
+        GuestCart guestCart = (GuestCart) session.getAttribute("guestCart");
+                if (guestCart == null) {
+                    throw new CartNotFoundException(session.getId());
+                }
         Cart cart = userCartRepository.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException(userId));
 
@@ -43,7 +47,7 @@ public class CartService {
                 userCartItemRepository.save(newCartItem);
             }
         }
-        guestCartRepository.delete(guestCart.getSessionId());
+        guestCartService.deleteGuestCart(session);
 
         List<CartItem> items = userCartItemService.getCartItemsByCartId(cart.getId());
         return new UserCartResponse(cart, items);
