@@ -29,7 +29,7 @@ public class UserCartItemService {
     private final UserCartRedisRepository userCartRedisRepository;
 
     @Transactional
-    public UserCartItemResponse createUserCartItem(Long userId, CartItemRequest request) {
+    public UserCartItemResponse addUserCartItem(Long userId, CartItemRequest request) {
         Cart cart = userCartRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
@@ -39,7 +39,7 @@ public class UserCartItemService {
                     return savedCart;
                 });
 
-        // 같은 책이 이미 있으면 수량 증가
+        // 같은 책이 이미 있으면 수량 증가 - updateQuantity가 있어도 필요!!
         CartItem existingItem = userCartItemRepository.findByCartAndBookId(cart, request.getBookId());
         if (existingItem != null) {
             existingItem.setQuantity(existingItem.getQuantity() + request.getQuantity());
@@ -110,7 +110,10 @@ public class UserCartItemService {
         return items;
     }
 
-    @Transactional
+    @Transactional  // gpt: 좋은 질문이야! 지금 네 코드 구조는 수량 감소도 충분히 처리할 수 있어.
+                     // 1 → 0으로 내려가려 하면 1로 유지하고 싶다면?
+                    // 이건 프론트단에서 컨트롤해줘야 해.
+                    // 즉,  버튼 눌렀을 때 수량이 1이면, 버튼을 비활성화하거나 요청 자체를 막는 게 정석이야.
     public UserCartItemResponse updateQuantity(Long cartItemId, CartItemRequest request) {
         CartItem cartItem = userCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> CartItemNotFoundException.forCartItemId(cartItemId));
@@ -118,8 +121,6 @@ public class UserCartItemService {
         if (!cartItem.getBookId().equals(request.getBookId())) {
             throw new InvalidException("요청한 bookId와 해당 cartItem 의 bookId가 일치하지 않습니다.");
         }
-
-        if (request.getQuantity() <= 0) throw new InvalidException("수량은 0보다 커야합니다.");
 
         cartItem.setQuantity(request.getQuantity());
         CartItem updatedCartItem = userCartItemRepository.save(cartItem);

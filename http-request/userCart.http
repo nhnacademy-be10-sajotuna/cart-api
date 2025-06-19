@@ -21,7 +21,7 @@ Accept: application/json
 X-User-Id: 22
 
 {
-  "bookId": 3,
+  "bookId": 1,
   "quantity": 3
 }
 

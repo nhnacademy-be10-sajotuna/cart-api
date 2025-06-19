@@ -20,7 +20,7 @@ public class UserCartItemController {
                                                                    @Valid @RequestBody CartItemRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(userCartItemService.createUserCartItem(userId, request));
+                .body(userCartItemService.addUserCartItem(userId, request));
     }
     // 장바구니 책 단건조회
     @GetMapping("/{cartItemId}")
