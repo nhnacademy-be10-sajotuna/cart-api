@@ -20,14 +20,15 @@ public class UserCartItemController {
                                                                    @Valid @RequestBody CartItemRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(userCartItemService.createUserCartItem(userId, request));
+                .body(userCartItemService.addUserCartItem(userId, request));
     }
     // 장바구니 책 단건조회
     @GetMapping("/{cartItemId}")
-    public ResponseEntity<UserCartItemResponse> getUserCartItem(@PathVariable Long cartItemId) {
+    public ResponseEntity<UserCartItemResponse> getUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
+                                                                @PathVariable Long cartItemId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userCartItemService.getCartItemByCartItemId(cartItemId));
+                .body(userCartItemService.getCartItemByCartItemId(userId,cartItemId));
     }
     // 장바구니 책 수량 변경
     @PatchMapping("/{cartItemId}")

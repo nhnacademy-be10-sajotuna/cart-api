@@ -3,7 +3,9 @@ package com.dooray.bookstorecarts;
 import com.dooray.bookstorecarts.entity.Cart;
 import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.exception.CartNotFoundException;
+import com.dooray.bookstorecarts.redisdto.RedisCartDto;
 import com.dooray.bookstorecarts.repository.UserCartItemRepository;
+import com.dooray.bookstorecarts.repository.UserCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
 import com.dooray.bookstorecarts.response.UserCartResponse;
 import com.dooray.bookstorecarts.service.UserCartItemService;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -29,6 +32,8 @@ public class UserCartServiceTest {
     private UserCartItemRepository userCartItemRepository;
     @Mock
     private UserCartItemService userCartItemService;
+    @Mock
+    private UserCartRedisRepository userCartRedisRepository;
     @InjectMocks
     private UserCartService userCartService;
 
@@ -46,7 +51,7 @@ public class UserCartServiceTest {
         mockCartItem.setQuantity(5L);
 
         List<CartItem> items = List.of(mockCartItem);
-
+        given(userCartRedisRepository.findByUserId(userId)).willReturn(null);
         given(userCartRepository.findByUserId(userId)).willReturn(Optional.of(mockCart));
         given(userCartItemRepository.findByCart(mockCart)).willReturn(items);
 
@@ -58,61 +63,44 @@ public class UserCartServiceTest {
         assertEquals(mockCart.getId(), response.getCartId()); // 여기 수정
         assertEquals(mockCart.getUserId(), response.getUserId()); // 추가로 확인 가능
         assertEquals(1, response.getItems().size());
-    }
 
-    @Test
-    void getCartByCartId() {
-        // Given
-        Long CartId = 1L;
-        Cart mockCart = new Cart();
-        mockCart.setId(CartId);
-        mockCart.setUserId(22L);
-
-        given(userCartRepository.findById(CartId)).willReturn(Optional.of(mockCart));
-
-        // When
-        Cart cart = userCartService.getCartByCartId(CartId);
-
-        // Then
-        assertNotNull(cart);
-        assertEquals(CartId, cart.getId());
-        assertEquals(22L, cart.getUserId());
-
+        verify(userCartRedisRepository).save(any(RedisCartDto.class));
     }
 
     @Test
     void deleteUserCart() {
         // Given
-        Long CartId = 1L;
+        Long userId = 22L;
         Cart mockCart = new Cart();
-        mockCart.setId(CartId);
-        mockCart.setUserId(22L);
+        mockCart.setId(100L);
+        mockCart.setUserId(userId);
 
-        given(userCartRepository.findById(CartId)).willReturn(Optional.of(mockCart));
+        given(userCartRepository.findByUserId(userId)).willReturn(Optional.of(mockCart));
 
         // When
-        userCartService.deleteUserCart(CartId);
+        userCartService.deleteUserCart(userId);
 
         // Then
-        verify(userCartItemService).deleteAllCartItemsFromCartId(CartId);
+        verify(userCartRepository).findByUserId(userId);
+        verify(userCartItemService).deleteAllCartItemsFromUserId(userId);
         verify(userCartRepository).delete(mockCart);
+        verify(userCartRedisRepository).deleteByUserId(userId);
     }
 
     @Test
     void getCartByUserId_CartNotFound() {
         Long userId = 22L;
         given(userCartRepository.findByUserId(userId)).willReturn(Optional.empty());
-
         assertThrows(CartNotFoundException.class, () -> userCartService.getCartByUserId(userId));
     }
 
     @Test
-    void getCartByCartId_CartNotFound() {
-        Long cartId = 22L;
-        given(userCartRepository.findById(cartId)).willReturn(Optional.empty());
-
-        assertThrows(CartNotFoundException.class, () -> userCartService.getCartByCartId(cartId));
+    void deleteUserCart_CartNotFound() {
+        Long userId = 22L;
+        given(userCartRepository.findByUserId(userId)).willReturn(Optional.empty());
+        assertThrows(CartNotFoundException.class, () -> userCartService.deleteUserCart(userId));
     }
+
 }
 
 

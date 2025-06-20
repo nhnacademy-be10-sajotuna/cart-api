@@ -22,7 +22,7 @@ public class GuestCartItemController {
                                                                      HttpServletRequest httpServletRequest){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(guestCartItemService.createGuestCartItem(getSession(httpServletRequest), request));
+                .body(guestCartItemService.addGuestCartItem(getSession(httpServletRequest), request));
     }
     // 비회원 장바구니 책 단건조회
     @GetMapping("/{bookId}")

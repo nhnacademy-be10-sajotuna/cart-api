@@ -9,7 +9,10 @@ Content-Type: application/json
 X-User-Id: 22
 
 ### 장바구니 완전삭제(유저가 회원탈퇴할때 카트가 db에 남지 않도록)
-DELETE http://localhost:10370/api/user-carts/1
+DELETE http://localhost:10370/api/user-carts
+Accept: application/json
+Content-Type: application/json
+X-User-Id: 22
 
 ### 장바구니에 책담기(해당 유저의 장바구니가 없을경우 장바구니 생성)
 POST http://localhost:10370/api/user-cart-items
@@ -18,15 +21,19 @@ Accept: application/json
 X-User-Id: 22
 
 {
-  "bookId": 2,
+  "bookId": 1,
   "quantity": 3
 }
 
 ### 장바구니 책 단건조회
-GET http://localhost:10370/api/user-cart-items/2
+GET http://localhost:10370/api/user-cart-items/3
+Content-Type: application/json
+Accept: application/json
+X-User-Id: 22
+
 
 ### 책 수량 변경(회원)
-PATCH http://localhost:10370/api/user-cart-items/2
+PATCH http://localhost:10370/api/user-cart-items/3
 Content-Type: application/json
 Accept: application/json
 
@@ -36,7 +43,7 @@ Accept: application/json
 }
 
 ### 장바구니 책 삭제(단건 삭제)
-DELETE http://localhost:10370/api/user-cart-items/1
+DELETE http://localhost:10370/api/user-cart-items/3
 
 ### 장바구니 비우기
 DELETE http://localhost:10370/api/user-cart-items
