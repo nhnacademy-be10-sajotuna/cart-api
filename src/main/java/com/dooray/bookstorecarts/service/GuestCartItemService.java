@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class GuestCartItemService {
 
     @Transactional
-    public GuestCartItemResponse createGuestCartItem(HttpSession session, CartItemRequest request) {
+    public GuestCartItemResponse addGuestCartItem(HttpSession session, CartItemRequest request) {
         GuestCart guestCart = (GuestCart) session.getAttribute("guestCart");
         if (guestCart == null) {
             guestCart = new GuestCart(session.getId(), new ArrayList<>());
@@ -24,7 +24,7 @@ public class GuestCartItemService {
 
         for (GuestCartItem existingItem : guestCart.getItems()) {
             if (existingItem.getBookId().equals(request.getBookId())) {
-                existingItem.setQuantity(existingItem.getQuantity() + request.getQuantity());
+                existingItem.setQuantity(request.getQuantity());
                 session.setAttribute("guestCart", guestCart);
                 return new GuestCartItemResponse(existingItem);
             }

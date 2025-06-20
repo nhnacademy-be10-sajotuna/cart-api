@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface UserCartItemRepository extends JpaRepository<CartItem, Long>, QuerydslRepository {
     List<CartItem> findByCart(Cart cart);
-//    CartItem findByCartAndBookId(Cart cart, Long bookId);
+
 }

@@ -1,6 +1,5 @@
 package com.dooray.bookstorecarts.service;
 
-import com.dooray.bookstorecarts.exception.*;
 import com.dooray.bookstorecarts.redisdto.GuestCart;
 import com.dooray.bookstorecarts.redisdto.GuestCartItem;
 import com.dooray.bookstorecarts.redisdto.RedisCartDto;
@@ -22,7 +21,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CartService {
 
-    private final UserCartItemService userCartItemService;
     private final GuestCartService guestCartService;
     private final UserCartRepository userCartRepository;
     private final UserCartItemRepository userCartItemRepository;
