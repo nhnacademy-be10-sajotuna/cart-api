@@ -2,6 +2,7 @@ package com.dooray.bookstorecarts.controller;
 
 import com.dooray.bookstorecarts.response.GuestCartResponse;
 import com.dooray.bookstorecarts.service.GuestCartService;
+import com.dooray.bookstorecarts.util.SessionUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -17,19 +18,15 @@ public class GuestCartController {
 
     // 장바구니 조회(비회원 장바구니 조회 - 모든 아이템 조회)
     @GetMapping
-    public ResponseEntity<GuestCartResponse> getGuestCart(HttpServletRequest request) {
+    public ResponseEntity<GuestCartResponse> getGuestCart(HttpServletRequest httpServletRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(guestCartService.getCartBySession(getSession(request)));
+                .body(guestCartService.getCartBySession(SessionUtil.getSession(httpServletRequest)));
     }
     // 비회원 장바구니 수동삭제(레디스에서 자동삭제되게 하였지만 혹시나 필요할경우 사용)
     @DeleteMapping
-    public ResponseEntity<Void> deleteGuestCart(HttpServletRequest request) {
-        guestCartService.deleteGuestCart(getSession(request));
+    public ResponseEntity<Void> deleteGuestCart(HttpServletRequest httpServletRequest) {
+        guestCartService.deleteGuestCart(SessionUtil.getSession(httpServletRequest));
         return ResponseEntity.noContent().build();
-    }
-
-    private HttpSession getSession(HttpServletRequest request) {
-        return request.getSession();
     }
 }

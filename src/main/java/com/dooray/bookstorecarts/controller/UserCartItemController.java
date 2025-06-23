@@ -16,7 +16,7 @@ public class UserCartItemController {
     private final UserCartItemService userCartItemService;
     // 장바구니에 책담기(해당 유저의 장바구니가 없을경우 장바구니 생성)
     @PostMapping
-    public ResponseEntity<UserCartItemResponse> createUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
+    public ResponseEntity<UserCartItemResponse> addUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
                                                                    @Valid @RequestBody CartItemRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
