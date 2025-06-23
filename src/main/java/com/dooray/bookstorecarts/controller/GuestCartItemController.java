@@ -3,6 +3,7 @@ package com.dooray.bookstorecarts.controller;
 import com.dooray.bookstorecarts.request.CartItemRequest;
 import com.dooray.bookstorecarts.response.GuestCartItemResponse;
 import com.dooray.bookstorecarts.service.GuestCartItemService;
+import com.dooray.bookstorecarts.util.SessionUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -22,7 +23,7 @@ public class GuestCartItemController {
                                                                      HttpServletRequest httpServletRequest){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(guestCartItemService.addGuestCartItem(getSession(httpServletRequest), request));
+                .body(guestCartItemService.addGuestCartItem(SessionUtil.getSession(httpServletRequest), request));
     }
     // 비회원 장바구니 책 단건조회
     @GetMapping("/{bookId}")
@@ -30,7 +31,7 @@ public class GuestCartItemController {
                                                                   HttpServletRequest httpServletRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(guestCartItemService.getGuestCartItemByBookId(getSession(httpServletRequest), bookId));
+                .body(guestCartItemService.getGuestCartItemByBookId(SessionUtil.getSession(httpServletRequest), bookId));
     }
     // 비회원 장바구니 책 수량 변경
     @PatchMapping
@@ -38,23 +39,19 @@ public class GuestCartItemController {
                                                                      HttpServletRequest httpServletRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(guestCartItemService.updateQuantity(getSession(httpServletRequest), request));
+                .body(guestCartItemService.updateQuantity(SessionUtil.getSession(httpServletRequest), request));
     }
     // 비회원 장바구니 책 삭제(단건 삭제)
     @DeleteMapping("/{bookId}")
     public ResponseEntity<Void> deleteGuestCartItem(@PathVariable Long bookId,
                                                     HttpServletRequest httpServletRequest) {
-        guestCartItemService.deleteGuestCartItem(getSession(httpServletRequest), bookId);
+        guestCartItemService.deleteGuestCartItem(SessionUtil.getSession(httpServletRequest), bookId);
         return ResponseEntity.noContent().build();
     }
     // 비회원 장바구니 비우기
     @DeleteMapping
     public ResponseEntity<Void>  clearGuestCartItems(HttpServletRequest httpServletRequest) {
-        guestCartItemService.deleteAllGuestCartItems(getSession(httpServletRequest));
+        guestCartItemService.deleteAllGuestCartItems(SessionUtil.getSession(httpServletRequest));
         return ResponseEntity.noContent().build();
-
-    }
-    private HttpSession getSession(HttpServletRequest request) {
-        return request.getSession();
     }
 }

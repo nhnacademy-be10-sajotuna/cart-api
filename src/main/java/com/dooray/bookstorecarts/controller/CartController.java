@@ -2,6 +2,7 @@ package com.dooray.bookstorecarts.controller;
 
 import com.dooray.bookstorecarts.response.UserCartResponse;
 import com.dooray.bookstorecarts.service.*;
+import com.dooray.bookstorecarts.util.SessionUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,6 @@ public class CartController {
                                                        HttpServletRequest httpServletRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(cartService.mergeCarts(userId, getSession(httpServletRequest)));
-    }
-
-    private HttpSession getSession(HttpServletRequest request) {
-        return request.getSession();
+                .body(cartService.mergeCarts(userId, SessionUtil.getSession(httpServletRequest)));
     }
 }
