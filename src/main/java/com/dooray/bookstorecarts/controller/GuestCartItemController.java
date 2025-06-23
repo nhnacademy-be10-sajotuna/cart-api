@@ -18,7 +18,7 @@ public class GuestCartItemController {
     private final GuestCartItemService guestCartItemService;
     // 비회원 장바구니에 책담기(해당세션의 장바구니가 없을경우 장바구니 생성)
     @PostMapping
-    public ResponseEntity<GuestCartItemResponse> createGuestCartItem(@Valid @RequestBody CartItemRequest request,
+    public ResponseEntity<GuestCartItemResponse> addGuestCartItem(@Valid @RequestBody CartItemRequest request,
                                                                      HttpServletRequest httpServletRequest){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
