@@ -2,13 +2,12 @@ package com.dooray.bookstorecarts.service;
 
 import com.dooray.bookstorecarts.entity.Cart;
 import com.dooray.bookstorecarts.entity.CartItem;
-import com.dooray.bookstorecarts.exception.CartAlreadyExistsException;
 import com.dooray.bookstorecarts.exception.CartNotFoundException;
 import com.dooray.bookstorecarts.redisdto.RedisCartDto;
 import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.repository.UserCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
-import com.dooray.bookstorecarts.response.UserCartResponse;
+import com.dooray.bookstorecarts.response.CartResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,7 @@ public class UserCartService {
     private final UserCartRedisRepository userCartRedisRepository;
 
 
-    public UserCartResponse getCartByUserId(Long userId) {    // 유저 아이디로 회원카트 반환
+    public CartResponse getCartByUserId(Long userId) {    // 유저 아이디로 회원카트 반환
         RedisCartDto redisCart = userCartRedisRepository.findByUserId(userId);
         if (redisCart != null) {
             List<CartItem> items = redisCart.getItems().stream()
@@ -40,14 +39,14 @@ public class UserCartService {
             Cart cart = new Cart();
             cart.setId(redisCart.getCartId());
             cart.setUserId(redisCart.getUserId());
-            return new UserCartResponse(cart, items);
+            return new CartResponse(cart, items);
         }
 
         Cart cart = userCartRepository.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException(userId));
         List<CartItem> items = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, items));
-        return new UserCartResponse(cart, items);
+        return new CartResponse(cart, items);
     }
 
     public Cart getCartEntityByUserId(Long userId) { // 이 메서드는 무조건 db 에서만 가져오기!!

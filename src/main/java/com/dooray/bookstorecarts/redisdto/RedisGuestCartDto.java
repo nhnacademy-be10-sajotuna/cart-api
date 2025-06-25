@@ -10,8 +10,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GuestCart implements Serializable {
+public class RedisGuestCartDto implements Serializable {
     private static final long serialVersionUID = 1L;
-    private String sessionId;
-    private List<GuestCartItem> items;
+
+    private String cartId;
+    private List<RedisGuestCartItemDto> items;
+
 }

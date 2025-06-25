@@ -1,23 +1,36 @@
 package com.dooray.bookstorecarts.service;
 
 import com.dooray.bookstorecarts.exception.CartNotFoundException;
-import com.dooray.bookstorecarts.redisdto.GuestCart;
-import com.dooray.bookstorecarts.response.GuestCartResponse;
-import jakarta.servlet.http.HttpSession;
+import com.dooray.bookstorecarts.redisdto.RedisGuestCartDto;
+import com.dooray.bookstorecarts.repository.GuestCartRedisRepository;
+import com.dooray.bookstorecarts.response.CartResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
+@RequiredArgsConstructor
 public class GuestCartService {
-    public GuestCartResponse getCartBySession(HttpSession session) {
-        GuestCart guestCart = (GuestCart) session.getAttribute("guestCart");
+
+    private final GuestCartRedisRepository guestCartRedisRepository;
+
+    public CartResponse getCartByCartId(String cartId) {
+        RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
+
         if (guestCart == null) {
-            throw new CartNotFoundException(session.getId());
+            guestCart = new RedisGuestCartDto(cartId, new ArrayList<>());
         }
 
-        return new GuestCartResponse(guestCart);
+        return new CartResponse(guestCart);
     }
 
-    public void deleteGuestCart(HttpSession session) {
-        session.invalidate();
+    public void deleteGuestCart(String cartId) {
+        RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
+
+        if (guestCart == null) {
+            throw new CartNotFoundException(cartId);
+        }
+        guestCartRedisRepository.deleteByCartId(cartId);
     }
 }

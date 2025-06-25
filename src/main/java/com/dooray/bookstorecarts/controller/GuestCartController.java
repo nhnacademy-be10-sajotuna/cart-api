@@ -1,10 +1,7 @@
 package com.dooray.bookstorecarts.controller;
 
-import com.dooray.bookstorecarts.response.GuestCartResponse;
+import com.dooray.bookstorecarts.response.CartResponse;
 import com.dooray.bookstorecarts.service.GuestCartService;
-import com.dooray.bookstorecarts.util.SessionUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +15,15 @@ public class GuestCartController {
 
     // 장바구니 조회(비회원 장바구니 조회 - 모든 아이템 조회)
     @GetMapping
-    public ResponseEntity<GuestCartResponse> getGuestCart(HttpServletRequest httpServletRequest) {
+    public ResponseEntity<CartResponse> getGuestCart(@ModelAttribute("guestCartId") String cartId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(guestCartService.getCartBySession(SessionUtil.getSession(httpServletRequest)));
+                .body(guestCartService.getCartByCartId(cartId));
     }
     // 비회원 장바구니 수동삭제(레디스에서 자동삭제되게 하였지만 혹시나 필요할경우 사용)
     @DeleteMapping
-    public ResponseEntity<Void> deleteGuestCart(HttpServletRequest httpServletRequest) {
-        guestCartService.deleteGuestCart(SessionUtil.getSession(httpServletRequest));
+    public ResponseEntity<Void> deleteGuestCart(@ModelAttribute("guestCartId") String cartId) {
+        guestCartService.deleteGuestCart(cartId);
         return ResponseEntity.noContent().build();
     }
 }

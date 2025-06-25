@@ -1,7 +1,7 @@
 package com.dooray.bookstorecarts.config;
 
-import com.dooray.bookstorecarts.redisdto.GuestCart;
 import com.dooray.bookstorecarts.redisdto.RedisCartDto;
+import com.dooray.bookstorecarts.redisdto.RedisGuestCartDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,18 +18,33 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, RedisCartDto> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, RedisCartDto> sessionRedisTemplate = new RedisTemplate<>();
-        sessionRedisTemplate.setConnectionFactory(redisConnectionFactory);
+    public RedisTemplate<String, RedisCartDto> userCartRedisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, RedisCartDto> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
 
         Jackson2JsonRedisSerializer<RedisCartDto> serializer = new Jackson2JsonRedisSerializer<>(RedisCartDto.class);
-        sessionRedisTemplate.setKeySerializer(new StringRedisSerializer());
-        sessionRedisTemplate.setValueSerializer(serializer);
-        sessionRedisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        sessionRedisTemplate.setHashValueSerializer(serializer);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(serializer);
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(serializer);
 
-        sessionRedisTemplate.afterPropertiesSet();
+        template.afterPropertiesSet();
+        return template;
+    }
 
-        return sessionRedisTemplate;
+    @Bean
+    public RedisTemplate<String, RedisGuestCartDto> guestCartRedisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, RedisGuestCartDto> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+
+        Jackson2JsonRedisSerializer<RedisGuestCartDto> serializer = new Jackson2JsonRedisSerializer<>(RedisGuestCartDto.class);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(serializer);
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(serializer);
+
+        template.afterPropertiesSet();
+        return template;
     }
 }
+

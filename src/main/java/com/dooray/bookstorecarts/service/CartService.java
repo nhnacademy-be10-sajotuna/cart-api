@@ -1,15 +1,15 @@
 package com.dooray.bookstorecarts.service;
 
-import com.dooray.bookstorecarts.redisdto.GuestCart;
-import com.dooray.bookstorecarts.redisdto.GuestCartItem;
+import com.dooray.bookstorecarts.redisdto.RedisGuestCartDto;
+import com.dooray.bookstorecarts.redisdto.RedisGuestCartItemDto;
 import com.dooray.bookstorecarts.redisdto.RedisCartDto;
+import com.dooray.bookstorecarts.repository.GuestCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.entity.Cart;
 import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.repository.UserCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
-import com.dooray.bookstorecarts.response.UserCartResponse;
-import jakarta.servlet.http.HttpSession;
+import com.dooray.bookstorecarts.response.CartResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,10 +25,11 @@ public class CartService {
     private final UserCartRepository userCartRepository;
     private final UserCartItemRepository userCartItemRepository;
     private final UserCartRedisRepository userCartRedisRepository;
+    private final GuestCartRedisRepository guestCartRedisRepository;
 
     @Transactional
-    public UserCartResponse mergeCarts(Long userId, HttpSession session) {
-        GuestCart guestCart = (GuestCart) session.getAttribute("guestCart");
+    public CartResponse mergeCarts(Long userId, String cartId) {
+        RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
         // 회원이 장바구니 아이템을 한번도 안담았으면 카트가 널이기때문에 카트 새로 생성
         Cart cart = getOrCreateCart(userId);
         // 게스트 카트가 없으면 병합을 건너뛰자 - 기존 유저의 카트만 반환
@@ -36,7 +37,7 @@ public class CartService {
                     return getUserCartResponse(cart);
                 }
 
-        for (GuestCartItem guestCartItem : guestCart.getItems()) {
+        for (RedisGuestCartItemDto guestCartItem : guestCart.getItems()) {
             CartItem cartItem = userCartItemRepository.findByCartAndBookId(cart, guestCartItem.getBookId());
 
             if(cartItem != null) {
@@ -50,11 +51,11 @@ public class CartService {
                 userCartItemRepository.save(newCartItem);
             }
         }
-        guestCartService.deleteGuestCart(session);
+        guestCartService.deleteGuestCart(cartId);
 
         List<CartItem> items = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, items));
-        return new UserCartResponse(cart, items);
+        return new CartResponse(cart, items);
     }
     // 공통 로직 분리 - 카트 조회 후 없으면 새로 생성
     private Cart getOrCreateCart(Long userId){
@@ -68,9 +69,9 @@ public class CartService {
                 });
     }
     // 기존 유저 카트를 반환
-    private UserCartResponse getUserCartResponse(Cart cart) {
+    private CartResponse getUserCartResponse(Cart cart) {
         List<CartItem> cartItems = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, cartItems));
-        return new UserCartResponse(cart, cartItems);
+        return new CartResponse(cart, cartItems);
     }
 }

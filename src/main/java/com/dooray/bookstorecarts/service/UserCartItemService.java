@@ -11,12 +11,11 @@ import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.repository.UserCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
 import com.dooray.bookstorecarts.request.CartItemRequest;
-import com.dooray.bookstorecarts.response.UserCartItemResponse;
+import com.dooray.bookstorecarts.response.CartItemResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +28,7 @@ public class UserCartItemService {
     private final UserCartRedisRepository userCartRedisRepository;
 
     @Transactional
-    public UserCartItemResponse addUserCartItem(Long userId, CartItemRequest request) {
+    public CartItemResponse addUserCartItem(Long userId, CartItemRequest request) {
         Cart cart = userCartRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
@@ -48,7 +47,7 @@ public class UserCartItemService {
             List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
             userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
 
-            return new UserCartItemResponse(savedItem);
+            return new CartItemResponse(savedItem);
         }
 
         // 새로운 책이면 카트 아이템 추가
@@ -61,11 +60,11 @@ public class UserCartItemService {
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
 
-        return new UserCartItemResponse(savedItem);
+        return new CartItemResponse(savedItem);
     }
 
 
-    public UserCartItemResponse getCartItemByCartItemId(Long userId, Long cartItemId) {
+    public CartItemResponse getCartItemByCartItemId(Long userId, Long cartItemId) {
         RedisCartDto redisCart = userCartRedisRepository.findByUserId(userId);
 
         if (redisCart != null) {
@@ -75,7 +74,7 @@ public class UserCartItemService {
                     cartItem.setId(itemDto.getCartItemId());
                     cartItem.setBookId(itemDto.getBookId());
                     cartItem.setQuantity(itemDto.getQuantity());
-                    return new UserCartItemResponse(cartItem);
+                    return new CartItemResponse(cartItem);
                 }
             }
         }
@@ -87,7 +86,7 @@ public class UserCartItemService {
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
 
-        return new UserCartItemResponse(cartItem);
+        return new CartItemResponse(cartItem);
     }
 
     public List<CartItem> getCartItemsByUserId(Long userId){
@@ -111,7 +110,7 @@ public class UserCartItemService {
     }
 
     @Transactional
-    public UserCartItemResponse updateQuantity(Long cartItemId, CartItemRequest request) {
+    public CartItemResponse updateQuantity(Long cartItemId, CartItemRequest request) {
         CartItem cartItem = userCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> CartItemNotFoundException.forCartItemId(cartItemId));
 
@@ -126,7 +125,7 @@ public class UserCartItemService {
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
 
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
-        return new UserCartItemResponse(updatedCartItem);
+        return new CartItemResponse(updatedCartItem);
     }
 
     @Transactional
