@@ -5,6 +5,8 @@ import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.exception.CartItemNotFoundException;
 import com.dooray.bookstorecarts.exception.CartNotFoundException;
 import com.dooray.bookstorecarts.exception.InvalidException;
+import com.dooray.bookstorecarts.feign.BookFeignClient;
+import com.dooray.bookstorecarts.feign.BookResponse;
 import com.dooray.bookstorecarts.redisdto.RedisCartDto;
 import com.dooray.bookstorecarts.redisdto.RedisCartItemDto;
 import com.dooray.bookstorecarts.repository.UserCartItemRepository;
@@ -26,6 +28,7 @@ public class UserCartItemService {
     private final UserCartRepository userCartRepository;
     private final UserCartItemRepository userCartItemRepository;
     private final UserCartRedisRepository userCartRedisRepository;
+    private final BookFeignClient bookFeignClient;
 
     @Transactional
     public CartItemResponse addUserCartItem(Long userId, CartItemRequest request) {
@@ -47,7 +50,8 @@ public class UserCartItemService {
             List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
             userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
 
-            return new CartItemResponse(savedItem);
+            BookResponse book = bookFeignClient.getBook(savedItem.getBookId());
+            return new CartItemResponse(savedItem, book);
         }
 
         // 새로운 책이면 카트 아이템 추가
@@ -60,7 +64,8 @@ public class UserCartItemService {
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
 
-        return new CartItemResponse(savedItem);
+        BookResponse book = bookFeignClient.getBook(savedItem.getBookId());
+        return new CartItemResponse(savedItem,book);
     }
 
 
@@ -74,7 +79,8 @@ public class UserCartItemService {
                     cartItem.setId(itemDto.getCartItemId());
                     cartItem.setBookId(itemDto.getBookId());
                     cartItem.setQuantity(itemDto.getQuantity());
-                    return new CartItemResponse(cartItem);
+                    BookResponse book = bookFeignClient.getBook(itemDto.getBookId());
+                    return new CartItemResponse(cartItem,book);
                 }
             }
         }
@@ -85,8 +91,8 @@ public class UserCartItemService {
         Cart cart = cartItem.getCart();
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
-
-        return new CartItemResponse(cartItem);
+        BookResponse book = bookFeignClient.getBook(cartItem.getBookId());
+        return new CartItemResponse(cartItem,book);
     }
 
     public List<CartItem> getCartItemsByUserId(Long userId){
@@ -125,7 +131,8 @@ public class UserCartItemService {
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
 
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
-        return new CartItemResponse(updatedCartItem);
+        BookResponse book = bookFeignClient.getBook(cartItem.getBookId());
+        return new CartItemResponse(updatedCartItem,book);
     }
 
     @Transactional

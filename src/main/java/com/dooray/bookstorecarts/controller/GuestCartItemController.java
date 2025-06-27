@@ -24,7 +24,7 @@ public class GuestCartItemController {
     }
     // 비회원 장바구니 책 단건조회
     @GetMapping("/{bookId}")
-    public ResponseEntity<CartItemResponse> getGuestCartItem(@PathVariable Long bookId,
+    public ResponseEntity<CartItemResponse> getGuestCartItem(@PathVariable String bookId,
                                                                   @ModelAttribute("guestCartId") String cartId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -40,7 +40,7 @@ public class GuestCartItemController {
     }
     // 비회원 장바구니 책 삭제(단건 삭제)
     @DeleteMapping("/{bookId}")
-    public ResponseEntity<Void> deleteGuestCartItem(@PathVariable Long bookId,
+    public ResponseEntity<Void> deleteGuestCartItem(@PathVariable String bookId,
                                                     @ModelAttribute("guestCartId") String cartId) {
         guestCartItemService.deleteGuestCartItem(cartId, bookId);
         return ResponseEntity.noContent().build();

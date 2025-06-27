@@ -1,5 +1,6 @@
 package com.dooray.bookstorecarts.service;
 
+import com.dooray.bookstorecarts.feign.BookFeignClient;
 import com.dooray.bookstorecarts.redisdto.RedisGuestCartDto;
 import com.dooray.bookstorecarts.redisdto.RedisGuestCartItemDto;
 import com.dooray.bookstorecarts.redisdto.RedisCartDto;
@@ -26,6 +27,7 @@ public class CartService {
     private final UserCartItemRepository userCartItemRepository;
     private final UserCartRedisRepository userCartRedisRepository;
     private final GuestCartRedisRepository guestCartRedisRepository;
+    private final BookFeignClient bookFeignClient;
 
     @Transactional
     public CartResponse mergeCarts(Long userId, String cartId) {
@@ -55,7 +57,7 @@ public class CartService {
 
         List<CartItem> items = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, items));
-        return new CartResponse(cart, items);
+        return new CartResponse(cart, items, bookFeignClient);
     }
     // 공통 로직 분리 - 카트 조회 후 없으면 새로 생성
     private Cart getOrCreateCart(Long userId){
@@ -72,6 +74,6 @@ public class CartService {
     private CartResponse getUserCartResponse(Cart cart) {
         List<CartItem> cartItems = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, cartItems));
-        return new CartResponse(cart, cartItems);
+        return new CartResponse(cart, cartItems, bookFeignClient);
     }
 }

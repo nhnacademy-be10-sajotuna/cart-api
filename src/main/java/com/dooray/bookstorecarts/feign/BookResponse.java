@@ -16,7 +16,7 @@ public class BookResponse {
     private String title;
     private String author;
     private String publisher;
-    private LocalDate publicationDate;
+    private String publicationDate;
     private Integer pageCount; // 추가: 페이지 수
     private String imageUrl; // 추가: 이미지 URL
     private String description;

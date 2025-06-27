@@ -2,6 +2,8 @@ package com.dooray.bookstorecarts.service;
 
 import com.dooray.bookstorecarts.exception.CartItemNotFoundException;
 import com.dooray.bookstorecarts.exception.CartNotFoundException;
+import com.dooray.bookstorecarts.feign.BookFeignClient;
+import com.dooray.bookstorecarts.feign.BookResponse;
 import com.dooray.bookstorecarts.redisdto.RedisGuestCartDto;
 import com.dooray.bookstorecarts.redisdto.RedisGuestCartItemDto;
 import com.dooray.bookstorecarts.repository.GuestCartRedisRepository;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 public class GuestCartItemService {
     private final GuestCartRedisRepository guestCartRedisRepository;
+    private final BookFeignClient bookFeignClient;
 
     @Transactional
     public CartItemResponse addGuestCartItem(String cartId, CartItemRequest request) {
@@ -29,7 +32,9 @@ public class GuestCartItemService {
             if (existingItem.getBookId().equals(request.getBookId())) {
                 existingItem.setQuantity(request.getQuantity());
                 guestCartRedisRepository.save(guestCart);
-                return new CartItemResponse(existingItem);
+
+                BookResponse book = bookFeignClient.getBook(existingItem.getBookId());
+                return new CartItemResponse(existingItem,book);
             }
         }
 
@@ -39,18 +44,20 @@ public class GuestCartItemService {
         guestCart.getItems().add(newItem);
 
         guestCartRedisRepository.save(guestCart);
-        return new CartItemResponse(newItem);
+        BookResponse book = bookFeignClient.getBook(newItem.getBookId());
+        return new CartItemResponse(newItem, book);
     }
 
     // 회원은 카트아이템(기본키, 오토인크리즈먼트키)로 식별되는데 비회원은 기본키없어서 cart Id와 book id가 둘다 있어야 식별가능
-    public CartItemResponse getGuestCartItemByBookId(String CartId, Long BookId){
+    public CartItemResponse getGuestCartItemByBookId(String CartId, String BookId){
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(CartId);
         if (guestCart == null) {
             throw new CartNotFoundException(CartId);
         }
         for(RedisGuestCartItemDto item : guestCart.getItems()){
             if(item.getBookId().equals(BookId)){
-                return new CartItemResponse(item);
+                BookResponse book = bookFeignClient.getBook(item.getBookId());
+                return new CartItemResponse(item,book);
             }
         }
         throw CartItemNotFoundException.forBookId(BookId);
@@ -74,12 +81,12 @@ public class GuestCartItemService {
         if (guestCartItem == null) throw  CartItemNotFoundException.forBookId(request.getBookId());
         guestCartItem.setQuantity(request.getQuantity());
         guestCartRedisRepository.save(guestCart);
-
-        return new CartItemResponse(guestCartItem);
+        BookResponse book = bookFeignClient.getBook(guestCartItem.getBookId());
+        return new CartItemResponse(guestCartItem, book);
     }
 
     @Transactional
-    public void deleteGuestCartItem(String cartId, Long bookId) {
+    public void deleteGuestCartItem(String cartId, String bookId) {
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
         if (guestCart == null) {
             throw new CartNotFoundException(cartId);
