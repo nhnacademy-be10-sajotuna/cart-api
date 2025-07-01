@@ -21,7 +21,6 @@ public class GuestCartItemService {
     private final GuestCartRedisRepository guestCartRedisRepository;
     private final BookFeignClient bookFeignClient;
 
-    @Transactional
     public CartItemResponse addGuestCartItem(String cartId, CartItemRequest request) {
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
         if (guestCart == null) {
@@ -63,7 +62,7 @@ public class GuestCartItemService {
         throw CartItemNotFoundException.forBookId(BookId);
     }
 
-    @Transactional
+
     public CartItemResponse updateQuantity(String cartId, CartItemRequest request) {
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
         if (guestCart == null) {
@@ -85,7 +84,6 @@ public class GuestCartItemService {
         return new CartItemResponse(guestCartItem, book);
     }
 
-    @Transactional
     public void deleteGuestCartItem(String cartId, String bookId) {
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
         if (guestCart == null) {
@@ -101,7 +99,6 @@ public class GuestCartItemService {
         guestCartRedisRepository.save(guestCart);
     }
 
-    @Transactional
     public void deleteAllGuestCartItems(String cartId) {
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
         guestCart.getItems().clear();

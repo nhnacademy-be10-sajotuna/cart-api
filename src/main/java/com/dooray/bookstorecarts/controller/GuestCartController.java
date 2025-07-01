@@ -15,7 +15,7 @@ public class GuestCartController {
 
     // 장바구니 조회(비회원 장바구니 조회 - 모든 아이템 조회)
     @GetMapping
-    public ResponseEntity<CartResponse> getGuestCart(@ModelAttribute("guestCartId") String cartId) {
+    public ResponseEntity<CartResponse> getGuestCart(@RequestHeader(value = "X-Guest-Cart-Id") String cartId) {
         System.out.println(cartId);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -23,7 +23,7 @@ public class GuestCartController {
     }
     // 비회원 장바구니 수동삭제(레디스에서 자동삭제되게 하였지만 혹시나 필요할경우 사용)
     @DeleteMapping
-    public ResponseEntity<Void> deleteGuestCart(@ModelAttribute("guestCartId") String cartId) {
+    public ResponseEntity<Void> deleteGuestCart(@RequestHeader(value = "X-Guest-Cart-Id") String cartId) {
         guestCartService.deleteGuestCart(cartId);
         return ResponseEntity.noContent().build();
     }
