@@ -28,7 +28,7 @@ public class GuestCartItemController {
                                                              @RequestHeader(value = "X-Guest-Cart-Id") String cartId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(guestCartItemService.getGuestCartItemByBookId(cartId, bookId));
+                .body(guestCartItemService.getGuestCartItemByIsbn(cartId, bookId));
     }
     // 비회원 장바구니 책 수량 변경
     @PatchMapping

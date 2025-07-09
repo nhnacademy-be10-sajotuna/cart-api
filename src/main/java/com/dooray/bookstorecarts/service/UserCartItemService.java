@@ -42,7 +42,7 @@ public class UserCartItemService {
                 });
 
         // 같은 책이 이미 있으면 요청한 수량으로 새로 설정(예스 24가 그럼)
-        CartItem existingItem = userCartItemRepository.findByCartAndBookId(cart, request.getBookId());
+        CartItem existingItem = userCartItemRepository.findByCartAndIsbn(cart, request.getIsbn());
         if (existingItem != null) {
             existingItem.setQuantity(request.getQuantity());
             CartItem savedItem = userCartItemRepository.save(existingItem);
@@ -50,13 +50,13 @@ public class UserCartItemService {
             List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
             userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
 
-            BookResponse book = bookFeignClient.getBook(savedItem.getBookId());
+            BookResponse book = bookFeignClient.getBook(savedItem.getIsbn());
             return new CartItemResponse(savedItem, book);
         }
 
         // 새로운 책이면 카트 아이템 추가
         CartItem newCartItem = new CartItem();
-        newCartItem.setBookId(request.getBookId());
+        newCartItem.setIsbn(request.getIsbn());
         newCartItem.setQuantity(request.getQuantity());
         newCartItem.setCart(cart);
         CartItem savedItem = userCartItemRepository.save(newCartItem);
@@ -64,7 +64,7 @@ public class UserCartItemService {
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
 
-        BookResponse book = bookFeignClient.getBook(savedItem.getBookId());
+        BookResponse book = bookFeignClient.getBook(savedItem.getIsbn());
         return new CartItemResponse(savedItem,book);
     }
 
@@ -77,9 +77,9 @@ public class UserCartItemService {
                 if (itemDto.getCartItemId().equals(cartItemId)) {
                     CartItem cartItem = new CartItem();
                     cartItem.setId(itemDto.getCartItemId());
-                    cartItem.setBookId(itemDto.getBookId());
+                    cartItem.setIsbn(itemDto.getIsbn());
                     cartItem.setQuantity(itemDto.getQuantity());
-                    BookResponse book = bookFeignClient.getBook(itemDto.getBookId());
+                    BookResponse book = bookFeignClient.getBook(itemDto.getIsbn());
                     return new CartItemResponse(cartItem,book);
                 }
             }
@@ -91,7 +91,7 @@ public class UserCartItemService {
         Cart cart = cartItem.getCart();
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
-        BookResponse book = bookFeignClient.getBook(cartItem.getBookId());
+        BookResponse book = bookFeignClient.getBook(cartItem.getIsbn());
         return new CartItemResponse(cartItem,book);
     }
 
@@ -102,7 +102,7 @@ public class UserCartItemService {
                     .map(dto -> {
                         CartItem item = new CartItem();
                         item.setId(dto.getCartItemId());
-                        item.setBookId(dto.getBookId());
+                        item.setIsbn(dto.getIsbn());
                         item.setQuantity(dto.getQuantity());
                         return item;
                     })
@@ -120,8 +120,8 @@ public class UserCartItemService {
         CartItem cartItem = userCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> CartItemNotFoundException.forCartItemId(cartItemId));
 
-        if (!cartItem.getBookId().equals(request.getBookId())) {
-            throw new InvalidException("요청한 bookId와 해당 cartItem 의 bookId가 일치하지 않습니다.");
+        if (!cartItem.getIsbn().equals(request.getIsbn())) {
+            throw new InvalidException("요청한 isbn과 해당 cartItem 의 isbn이 일치하지 않습니다.");
         }
 
         cartItem.setQuantity(request.getQuantity());
@@ -131,7 +131,7 @@ public class UserCartItemService {
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
 
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
-        BookResponse book = bookFeignClient.getBook(cartItem.getBookId());
+        BookResponse book = bookFeignClient.getBook(cartItem.getIsbn());
         return new CartItemResponse(updatedCartItem,book);
     }
 

@@ -17,7 +17,7 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cart_item_id")
     private Long id;  // 비회원은 null 가능
-    private String bookId;
+    private String isbn;
     private Long quantity;
     @ManyToOne
     @JoinColumn(name = "cart_id")

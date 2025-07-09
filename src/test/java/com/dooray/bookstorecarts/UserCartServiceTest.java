@@ -7,7 +7,8 @@ import com.dooray.bookstorecarts.redisdto.RedisCartDto;
 import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.repository.UserCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
-import com.dooray.bookstorecarts.response.UserCartResponse;
+import com.dooray.bookstorecarts.response.CartResponse;
+import com.dooray.bookstorecarts.service.CartResponseService;
 import com.dooray.bookstorecarts.service.UserCartItemService;
 import com.dooray.bookstorecarts.service.UserCartService;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,8 @@ public class UserCartServiceTest {
     private UserCartItemService userCartItemService;
     @Mock
     private UserCartRedisRepository userCartRedisRepository;
+    @Mock
+    private CartResponseService cartResponseService;
     @InjectMocks
     private UserCartService userCartService;
 
@@ -47,7 +50,7 @@ public class UserCartServiceTest {
 
         CartItem mockCartItem = new CartItem();
         mockCartItem.setId(1L);
-        mockCartItem.setBookId(1L);
+        mockCartItem.setIsbn("1");
         mockCartItem.setQuantity(5L);
 
         List<CartItem> items = List.of(mockCartItem);
@@ -55,16 +58,19 @@ public class UserCartServiceTest {
         given(userCartRepository.findByUserId(userId)).willReturn(Optional.of(mockCart));
         given(userCartItemRepository.findByCart(mockCart)).willReturn(items);
 
+        CartResponse mockResponse = new CartResponse();
+        mockResponse.setCartId(String.valueOf(mockCart.getId()));
+        given(cartResponseService.createFromUserCart(mockCart, items)).willReturn(mockResponse);
+
         // When - 실제 대상 메서드 호출
-        UserCartResponse response = userCartService.getCartByUserId(userId);
+        CartResponse response = userCartService.getCartByUserId(userId);
 
         // Then - 예상 결과 검증
         assertNotNull(response);
-        assertEquals(mockCart.getId(), response.getCartId()); // 여기 수정
-        assertEquals(mockCart.getUserId(), response.getUserId()); // 추가로 확인 가능
-        assertEquals(1, response.getItems().size());
+        assertEquals(String.valueOf(mockCart.getId()), response.getCartId());
 
         verify(userCartRedisRepository).save(any(RedisCartDto.class));
+        verify(cartResponseService).createFromUserCart(mockCart, items);
     }
 
     @Test

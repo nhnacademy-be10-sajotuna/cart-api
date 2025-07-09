@@ -1,6 +1,5 @@
 package com.dooray.bookstorecarts.service;
 
-import com.dooray.bookstorecarts.feign.BookFeignClient;
 import com.dooray.bookstorecarts.redisdto.RedisGuestCartDto;
 import com.dooray.bookstorecarts.redisdto.RedisGuestCartItemDto;
 import com.dooray.bookstorecarts.redisdto.RedisCartDto;
@@ -27,7 +26,7 @@ public class CartService {
     private final UserCartItemRepository userCartItemRepository;
     private final UserCartRedisRepository userCartRedisRepository;
     private final GuestCartRedisRepository guestCartRedisRepository;
-    private final BookFeignClient bookFeignClient;
+    private final CartResponseService cartResponseService;
 
     @Transactional
     public CartResponse mergeCarts(Long userId, String cartId) {
@@ -35,12 +34,14 @@ public class CartService {
         // 회원이 장바구니 아이템을 한번도 안담았으면 카트가 널이기때문에 카트 새로 생성
         Cart cart = getOrCreateCart(userId);
         // 게스트 카트가 없으면 병합을 건너뛰자 - 기존 유저의 카트만 반환
-                if (guestCart == null) {
-                    return getUserCartResponse(cart);
-                }
+        if (guestCart == null) {
+            List<CartItem> items = userCartItemRepository.findByCart(cart);
+            userCartRedisRepository.save(RedisCartDto.from(cart, items));
+            return cartResponseService.createFromUserCart(cart, items);
+        }
 
         for (RedisGuestCartItemDto guestCartItem : guestCart.getItems()) {
-            CartItem cartItem = userCartItemRepository.findByCartAndBookId(cart, guestCartItem.getBookId());
+            CartItem cartItem = userCartItemRepository.findByCartAndIsbn(cart, guestCartItem.getIsbn());
 
             if(cartItem != null) {
                 cartItem.setQuantity(cartItem.getQuantity() + guestCartItem.getQuantity());
@@ -48,16 +49,14 @@ public class CartService {
             }else {
                 CartItem newCartItem = new CartItem();
                 newCartItem.setCart(cart);
-                newCartItem.setBookId(guestCartItem.getBookId());
+                newCartItem.setIsbn(guestCartItem.getIsbn());
                 newCartItem.setQuantity(guestCartItem.getQuantity());
                 userCartItemRepository.save(newCartItem);
             }
         }
         guestCartService.deleteGuestCart(cartId);
 
-        List<CartItem> items = userCartItemRepository.findByCart(cart);
-        userCartRedisRepository.save(RedisCartDto.from(cart, items));
-        return new CartResponse(cart, items, bookFeignClient);
+        return getUserCartResponse(cart);
     }
     // 공통 로직 분리 - 카트 조회 후 없으면 새로 생성
     private Cart getOrCreateCart(Long userId){
@@ -74,6 +73,6 @@ public class CartService {
     private CartResponse getUserCartResponse(Cart cart) {
         List<CartItem> cartItems = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, cartItems));
-        return new CartResponse(cart, cartItems, bookFeignClient);
+        return cartResponseService.createFromUserCart(cart, cartItems);
     }
 }

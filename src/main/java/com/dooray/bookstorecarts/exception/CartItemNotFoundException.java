@@ -17,7 +17,7 @@ public class CartItemNotFoundException extends ApiException {
         return new CartItemNotFoundException(HttpStatus.NOT_FOUND.value(), MESSAGE_CART_ITEM + cartItemId);
     }
 
-    public static CartItemNotFoundException forBookId(String bookId) {
-        return new CartItemNotFoundException(HttpStatus.NOT_FOUND.value(), MESSAGE_BOOK + bookId);
+    public static CartItemNotFoundException forIsbn(String isbn) {
+        return new CartItemNotFoundException(HttpStatus.NOT_FOUND.value(), MESSAGE_BOOK + isbn);
     }
 }

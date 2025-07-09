@@ -2,16 +2,16 @@ package com.dooray.bookstorecarts;
 
 import com.dooray.bookstorecarts.entity.Cart;
 import com.dooray.bookstorecarts.entity.CartItem;
-import com.dooray.bookstorecarts.redisdto.GuestCart;
-import com.dooray.bookstorecarts.redisdto.GuestCartItem;
-import com.dooray.bookstorecarts.redisdto.RedisCartDto;
+import com.dooray.bookstorecarts.redisdto.RedisGuestCartDto;
+import com.dooray.bookstorecarts.redisdto.RedisGuestCartItemDto;
+import com.dooray.bookstorecarts.repository.GuestCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.repository.UserCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
-import com.dooray.bookstorecarts.response.UserCartResponse;
+import com.dooray.bookstorecarts.response.CartResponse;
+import com.dooray.bookstorecarts.service.CartResponseService;
 import com.dooray.bookstorecarts.service.CartService;
 import com.dooray.bookstorecarts.service.GuestCartService;
-import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -36,7 +37,9 @@ public class CartServiceTest {
     @Mock
     private UserCartRedisRepository userCartRedisRepository;
     @Mock
-    private HttpSession session;
+    private GuestCartRedisRepository guestCartRedisRepository;
+    @Mock
+    private CartResponseService cartResponseService;
     @InjectMocks
     private CartService cartService;
 
@@ -44,33 +47,39 @@ public class CartServiceTest {
     void mergeCarts(){
         // given
         Long userId = 22L;
+        String cartId = "test-cart-id";
 
-        GuestCartItem item = new GuestCartItem(1L, 3L);
-        GuestCart mockGuestCart = new GuestCart("test-session-id", List.of(item));
-        given(session.getAttribute("guestCart")).willReturn(mockGuestCart);
+        RedisGuestCartItemDto item = new RedisGuestCartItemDto("1", 3L);
+        RedisGuestCartDto mockGuestCart = new RedisGuestCartDto(cartId, List.of(item));
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(mockGuestCart);
 
         Cart mockCart = new Cart();
         mockCart.setId(100L);
         mockCart.setUserId(userId);
         given(userCartRepository.findByUserId(userId)).willReturn(Optional.of(mockCart));
 
-        given(userCartItemRepository.findByCartAndBookId(mockCart,1L)).willReturn(null);
+        given(userCartItemRepository.findByCartAndIsbn(mockCart,"1")).willReturn(null);
 
         CartItem cartItem = new CartItem();
         cartItem.setId(200L);
-        cartItem.setBookId(1L);
+        cartItem.setIsbn("1");
         cartItem.setQuantity(3L);
         cartItem.setCart(mockCart);
         given(userCartItemRepository.save(any())).willReturn(cartItem);
 
         given(userCartItemRepository.findByCart(mockCart)).willReturn(List.of(cartItem));
 
+        CartResponse mockResponse = new CartResponse();
+        mockResponse.setCartId(String.valueOf(mockCart.getId()));
+        given(cartResponseService.createFromUserCart(mockCart, List.of(cartItem))).willReturn(mockResponse);
+
         // when
-        UserCartResponse result = cartService.mergeCarts(userId, session);
+        CartResponse result = cartService.mergeCarts(userId, cartId);
+        
         // then
-        assert result != null;
-        assert result.getUserId().equals(userId);
-        assert result.getItems().size() == 1;
-        assert result.getItems().get(0).getBookId().equals(1L);
+        assertNotNull(result);
+        assertEquals(String.valueOf(mockCart.getId()), result.getCartId());
+        verify(guestCartService).deleteGuestCart(cartId);
+        verify(cartResponseService).createFromUserCart(mockCart, List.of(cartItem));
     }
 }

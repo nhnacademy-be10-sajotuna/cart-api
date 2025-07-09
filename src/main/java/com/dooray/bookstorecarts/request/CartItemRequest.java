@@ -13,7 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CartItemRequest {
     @NotNull(message = "책 ID는 필수입니다.")
-    private String bookId;
+    private String isbn;
     @NotNull(message = "수량은 필수입니다.")
     @Min(value = 1, message = "수량은 1 이상이어야 합니다.")
     private Long quantity;

@@ -4,5 +4,5 @@ import com.dooray.bookstorecarts.entity.Cart;
 import com.dooray.bookstorecarts.entity.CartItem;
 
 public interface QuerydslRepository {
-    CartItem findByCartAndBookId(Cart cart, String bookId);
+    CartItem findByCartAndIsbn(Cart cart, String isbn);
 }

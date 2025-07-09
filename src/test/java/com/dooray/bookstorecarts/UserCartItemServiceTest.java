@@ -11,7 +11,7 @@ import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.repository.UserCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
 import com.dooray.bookstorecarts.request.CartItemRequest;
-import com.dooray.bookstorecarts.response.UserCartItemResponse;
+import com.dooray.bookstorecarts.response.CartItemResponse;
 import com.dooray.bookstorecarts.service.UserCartItemService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +46,7 @@ public class UserCartItemServiceTest {
     @Test
     void addUserCartItem_WhenCartDoesNotExist_CreatesCartAndAddsItem() {
         Long userId = 1L;
-        CartItemRequest request = new CartItemRequest(10L, 3L);
+        CartItemRequest request = new CartItemRequest("10", 3L);
 
         // 1) 카트가 없어서 새로 만듦
         given(userCartRepository.findByUserId(userId)).willReturn(Optional.empty());
@@ -61,7 +61,7 @@ public class UserCartItemServiceTest {
 
         // 2) 아이템 저장 시
         CartItem savedItem = new CartItem();
-        savedItem.setBookId(request.getBookId());
+        savedItem.setIsbn(request.getIsbn());
         savedItem.setQuantity(request.getQuantity());
         savedItem.setCart(savedCart);
         given(userCartItemRepository.save(any(CartItem.class))).willReturn(savedItem);
@@ -73,10 +73,10 @@ public class UserCartItemServiceTest {
         given(userCartItemRepository.findByCart(savedCart)).willReturn(List.of(savedItem));
 
         // 실제 호출
-        UserCartItemResponse response = userCartItemService.addUserCartItem(userId, request);
+        CartItemResponse response = userCartItemService.addUserCartItem(userId, request);
 
         // 검증
-        assertEquals(request.getBookId(), response.getBookId());
+        assertEquals(request.getIsbn(), response.getIsbn());
         assertEquals(request.getQuantity(), response.getQuantity());
 
         verify(userCartRepository).findByUserId(userId);
@@ -93,17 +93,17 @@ public class UserCartItemServiceTest {
         existingCart.setUserId(userId);
 
         CartItem existingItem = new CartItem();
-        existingItem.setBookId(10L);
+        existingItem.setIsbn("10");
         existingItem.setQuantity(1L);
         existingItem.setCart(existingCart);
 
-        CartItemRequest request = new CartItemRequest(10L, 5L);
+        CartItemRequest request = new CartItemRequest("10", 5L);
 
         given(userCartRepository.findByUserId(userId)).willReturn(Optional.of(existingCart));
-        given(userCartItemRepository.findByCartAndBookId(existingCart, 10L)).willReturn(existingItem);
+        given(userCartItemRepository.findByCartAndIsbn(existingCart, "10")).willReturn(existingItem);
 
         CartItem savedItem = new CartItem();
-        savedItem.setBookId(10L);
+        savedItem.setIsbn("10");
         savedItem.setQuantity(5L);
         savedItem.setCart(existingCart);
 
@@ -111,13 +111,13 @@ public class UserCartItemServiceTest {
         given(userCartItemRepository.findByCart(existingCart)).willReturn(List.of(savedItem));
         doNothing().when(userCartRedisRepository).save(any());
 
-        UserCartItemResponse response = userCartItemService.addUserCartItem(userId, request);
+        CartItemResponse response = userCartItemService.addUserCartItem(userId, request);
 
-        assertEquals(10L, response.getBookId());
+        assertEquals("10", response.getIsbn());
         assertEquals(5L, response.getQuantity());
 
         verify(userCartRepository).findByUserId(userId);
-        verify(userCartItemRepository).findByCartAndBookId(existingCart, 10L);
+        verify(userCartItemRepository).findByCartAndIsbn(existingCart, "10");
         verify(userCartItemRepository).save(existingItem);
         verify(userCartRedisRepository, times(1)).save(any());
     }
@@ -129,13 +129,13 @@ public class UserCartItemServiceTest {
         existingCart.setId(100L);
         existingCart.setUserId(userId);
 
-        CartItemRequest request = new CartItemRequest(10L, 3L);
+        CartItemRequest request = new CartItemRequest("10", 3L);
 
         given(userCartRepository.findByUserId(userId)).willReturn(Optional.of(existingCart));
-        given(userCartItemRepository.findByCartAndBookId(existingCart, 10L)).willReturn(null);
+        given(userCartItemRepository.findByCartAndIsbn(existingCart, "10")).willReturn(null);
 
         CartItem newItem = new CartItem();
-        newItem.setBookId(10L);
+        newItem.setIsbn("10");
         newItem.setQuantity(3L);
         newItem.setCart(existingCart);
 
@@ -143,13 +143,13 @@ public class UserCartItemServiceTest {
         given(userCartItemRepository.findByCart(existingCart)).willReturn(List.of(newItem));
         doNothing().when(userCartRedisRepository).save(any());
 
-        UserCartItemResponse response = userCartItemService.addUserCartItem(userId, request);
+        CartItemResponse response = userCartItemService.addUserCartItem(userId, request);
 
-        assertEquals(10L, response.getBookId());
+        assertEquals("10", response.getIsbn());
         assertEquals(3L, response.getQuantity());
 
         verify(userCartRepository).findByUserId(userId);
-        verify(userCartItemRepository).findByCartAndBookId(existingCart, 10L);
+        verify(userCartItemRepository).findByCartAndIsbn(existingCart, "10");
         verify(userCartItemRepository).save(any(CartItem.class));
         verify(userCartRedisRepository, times(1)).save(any());
     }
@@ -161,7 +161,7 @@ public class UserCartItemServiceTest {
 
         RedisCartItemDto redisItem = new RedisCartItemDto();
         redisItem.setCartItemId(cartItemId);
-        redisItem.setBookId(10L);
+        redisItem.setIsbn("10");
         redisItem.setQuantity(5L);
 
         RedisCartDto redisCart = new RedisCartDto();
@@ -169,10 +169,10 @@ public class UserCartItemServiceTest {
 
         given(userCartRedisRepository.findByUserId(userId)).willReturn(redisCart);
 
-        UserCartItemResponse response = userCartItemService.getCartItemByCartItemId(userId, cartItemId);
+        CartItemResponse response = userCartItemService.getCartItemByCartItemId(userId, cartItemId);
 
         assertEquals(cartItemId, response.getCartItemId());
-        assertEquals(10L, response.getBookId());
+        assertEquals("10", response.getIsbn());
         assertEquals(5L, response.getQuantity());
 
         // DB와 Redis 재저장은 호출 안 돼야 함
@@ -189,7 +189,7 @@ public class UserCartItemServiceTest {
 
         CartItem cartItem = new CartItem();
         cartItem.setId(cartItemId);
-        cartItem.setBookId(10L);
+        cartItem.setIsbn("10");
         cartItem.setQuantity(5L);
 
         Cart cart = new Cart();
@@ -203,10 +203,10 @@ public class UserCartItemServiceTest {
 
         doNothing().when(userCartRedisRepository).save(any());
 
-        UserCartItemResponse response = userCartItemService.getCartItemByCartItemId(userId, cartItemId);
+        CartItemResponse response = userCartItemService.getCartItemByCartItemId(userId, cartItemId);
 
         assertEquals(cartItemId, response.getCartItemId());
-        assertEquals(10L, response.getBookId());
+        assertEquals("10", response.getIsbn());
         assertEquals(5L, response.getQuantity());
 
         verify(userCartItemRepository).findById(cartItemId);
@@ -236,7 +236,7 @@ public class UserCartItemServiceTest {
         Long userId = 1L;
         RedisCartItemDto redisItem = new RedisCartItemDto();
         redisItem.setCartItemId(101L);
-        redisItem.setBookId(20L);
+        redisItem.setIsbn("20");
         redisItem.setQuantity(2L);
 
         RedisCartDto redisCart = new RedisCartDto();
@@ -250,7 +250,7 @@ public class UserCartItemServiceTest {
         // then
         assertEquals(1, result.size());
         assertEquals(101L, result.get(0).getId());
-        assertEquals(20L, result.get(0).getBookId());
+        assertEquals("20", result.get(0).getIsbn());
         assertEquals(2L, result.get(0).getQuantity());
 
         verify(userCartRedisRepository).findByUserId(userId);
@@ -269,7 +269,7 @@ public class UserCartItemServiceTest {
 
         CartItem item = new CartItem();
         item.setId(101L);
-        item.setBookId(20L);
+        item.setIsbn("20");
         item.setQuantity(2L);
         item.setCart(cart);
 
@@ -304,7 +304,7 @@ public class UserCartItemServiceTest {
     void updateQuantity_WhenBookIdMatches_UpdatesSuccessfully() {
         // given
         Long cartItemId = 1L;
-        Long bookId = 10L;
+        String isbn = "10";
         Long newQuantity = 5L;
 
         Cart cart = new Cart();
@@ -312,11 +312,11 @@ public class UserCartItemServiceTest {
 
         CartItem existingItem = new CartItem();
         existingItem.setId(cartItemId);
-        existingItem.setBookId(bookId);
+        existingItem.setIsbn(isbn);
         existingItem.setQuantity(2L);
         existingItem.setCart(cart);
 
-        CartItemRequest request = new CartItemRequest(bookId, newQuantity);
+        CartItemRequest request = new CartItemRequest(isbn, newQuantity);
 
         given(userCartItemRepository.findById(cartItemId)).willReturn(Optional.of(existingItem));
         given(userCartItemRepository.save(existingItem)).willReturn(existingItem);
@@ -324,10 +324,10 @@ public class UserCartItemServiceTest {
         doNothing().when(userCartRedisRepository).save(any());
 
         // when
-        UserCartItemResponse response = userCartItemService.updateQuantity(cartItemId, request);
+        CartItemResponse response = userCartItemService.updateQuantity(cartItemId, request);
 
         // then
-        assertEquals(bookId, response.getBookId());
+        assertEquals(isbn, response.getIsbn());
         assertEquals(newQuantity, response.getQuantity());
         verify(userCartItemRepository).save(existingItem);
         verify(userCartRedisRepository).save(any());
@@ -337,7 +337,7 @@ public class UserCartItemServiceTest {
     void updateQuantity_WhenCartItemNotFound_ThrowsException() {
         // given
         Long cartItemId = 1L;
-        CartItemRequest request = new CartItemRequest(10L, 5L);
+        CartItemRequest request = new CartItemRequest("10", 5L);
         given(userCartItemRepository.findById(cartItemId)).willReturn(Optional.empty());
 
         // when & then
@@ -349,11 +349,11 @@ public class UserCartItemServiceTest {
     void updateQuantity_WhenBookIdMismatch_ThrowsInvalidException() {
         // given
         Long cartItemId = 1L;
-        CartItemRequest request = new CartItemRequest(999L, 5L); // 틀린 bookId
+        CartItemRequest request = new CartItemRequest("999", 5L); // 틀린 isbn
 
         CartItem existingItem = new CartItem();
         existingItem.setId(cartItemId);
-        existingItem.setBookId(10L);
+        existingItem.setIsbn("10");
         existingItem.setQuantity(3L);
         existingItem.setCart(new Cart());
 
@@ -408,6 +408,7 @@ public class UserCartItemServiceTest {
         verify(userCartItemRepository, never()).delete(any());
         verify(userCartRedisRepository, never()).save(any());
     }
+    
     @Test
     void deleteAllCartItemsFromUserId_WhenCartExists_ShouldDeleteItemsAndClearRedis() {
         // given
@@ -419,13 +420,13 @@ public class UserCartItemServiceTest {
 
         CartItem item1 = new CartItem();
         item1.setId(1L);
-        item1.setBookId(10L);
+        item1.setIsbn("10");
         item1.setQuantity(2L);
         item1.setCart(cart);
 
         CartItem item2 = new CartItem();
         item2.setId(2L);
-        item2.setBookId(20L);
+        item2.setIsbn("20");
         item2.setQuantity(1L);
         item2.setCart(cart);
 
@@ -464,5 +465,3 @@ public class UserCartItemServiceTest {
     }
 
 }
-
-

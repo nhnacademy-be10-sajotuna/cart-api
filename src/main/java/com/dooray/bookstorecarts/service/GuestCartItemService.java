@@ -9,7 +9,6 @@ import com.dooray.bookstorecarts.redisdto.RedisGuestCartItemDto;
 import com.dooray.bookstorecarts.repository.GuestCartRedisRepository;
 import com.dooray.bookstorecarts.request.CartItemRequest;
 import com.dooray.bookstorecarts.response.CartItemResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,38 +27,38 @@ public class GuestCartItemService {
         }
 
         for (RedisGuestCartItemDto existingItem : guestCart.getItems()) {
-            if (existingItem.getBookId().equals(request.getBookId())) {
+            if (existingItem.getIsbn().equals(request.getIsbn())) {
                 existingItem.setQuantity(request.getQuantity());
                 guestCartRedisRepository.save(guestCart);
 
-                BookResponse book = bookFeignClient.getBook(existingItem.getBookId());
+                BookResponse book = bookFeignClient.getBook(existingItem.getIsbn());
                 return new CartItemResponse(existingItem,book);
             }
         }
 
         RedisGuestCartItemDto newItem = new RedisGuestCartItemDto();
-        newItem.setBookId(request.getBookId());
+        newItem.setIsbn(request.getIsbn());
         newItem.setQuantity(request.getQuantity());
         guestCart.getItems().add(newItem);
 
         guestCartRedisRepository.save(guestCart);
-        BookResponse book = bookFeignClient.getBook(newItem.getBookId());
+        BookResponse book = bookFeignClient.getBook(newItem.getIsbn());
         return new CartItemResponse(newItem, book);
     }
 
     // 회원은 카트아이템(기본키, 오토인크리즈먼트키)로 식별되는데 비회원은 기본키없어서 cart Id와 book id가 둘다 있어야 식별가능
-    public CartItemResponse getGuestCartItemByBookId(String CartId, String BookId){
+    public CartItemResponse getGuestCartItemByIsbn(String CartId, String isbn){
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(CartId);
         if (guestCart == null) {
             throw new CartNotFoundException(CartId);
         }
         for(RedisGuestCartItemDto item : guestCart.getItems()){
-            if(item.getBookId().equals(BookId)){
-                BookResponse book = bookFeignClient.getBook(item.getBookId());
+            if(item.getIsbn().equals(isbn)){
+                BookResponse book = bookFeignClient.getBook(item.getIsbn());
                 return new CartItemResponse(item,book);
             }
         }
-        throw CartItemNotFoundException.forBookId(BookId);
+        throw CartItemNotFoundException.forIsbn(isbn);
     }
 
 
@@ -71,29 +70,29 @@ public class GuestCartItemService {
 
         RedisGuestCartItemDto guestCartItem = null;
         for (RedisGuestCartItemDto item : guestCart.getItems()) {
-            if (item.getBookId().equals(request.getBookId())) {
+            if (item.getIsbn().equals(request.getIsbn())) {
                 guestCartItem = item;
                 break;
             }
         }
 
-        if (guestCartItem == null) throw  CartItemNotFoundException.forBookId(request.getBookId());
+        if (guestCartItem == null) throw  CartItemNotFoundException.forIsbn(request.getIsbn());
         guestCartItem.setQuantity(request.getQuantity());
         guestCartRedisRepository.save(guestCart);
-        BookResponse book = bookFeignClient.getBook(guestCartItem.getBookId());
+        BookResponse book = bookFeignClient.getBook(guestCartItem.getIsbn());
         return new CartItemResponse(guestCartItem, book);
     }
 
-    public void deleteGuestCartItem(String cartId, String bookId) {
+    public void deleteGuestCartItem(String cartId, String isbn) {
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
         if (guestCart == null) {
             throw new CartNotFoundException(cartId);
         }
 
-        boolean removed = guestCart.getItems().removeIf(item -> item.getBookId().equals(bookId));
+        boolean removed = guestCart.getItems().removeIf(item -> item.getIsbn().equals(isbn));
 
         if (!removed) {
-            throw CartItemNotFoundException.forBookId(bookId);
+            throw CartItemNotFoundException.forIsbn(isbn);
         }
 
         guestCartRedisRepository.save(guestCart);

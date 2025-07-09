@@ -11,6 +11,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class RedisGuestCartItemDto implements Serializable {
     private static final long serialVersionUID = 1L;
-    private String bookId;
+    private String isbn;
     private Long quantity;
 }

@@ -2,12 +2,12 @@ package com.dooray.bookstorecarts;
 
 import com.dooray.bookstorecarts.exception.CartItemNotFoundException;
 import com.dooray.bookstorecarts.exception.CartNotFoundException;
-import com.dooray.bookstorecarts.redisdto.GuestCart;
-import com.dooray.bookstorecarts.redisdto.GuestCartItem;
+import com.dooray.bookstorecarts.redisdto.RedisGuestCartDto;
+import com.dooray.bookstorecarts.redisdto.RedisGuestCartItemDto;
+import com.dooray.bookstorecarts.repository.GuestCartRedisRepository;
 import com.dooray.bookstorecarts.request.CartItemRequest;
-import com.dooray.bookstorecarts.response.GuestCartItemResponse;
+import com.dooray.bookstorecarts.response.CartItemResponse;
 import com.dooray.bookstorecarts.service.GuestCartItemService;
-import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -15,11 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.any;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -28,189 +26,207 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 public class GuestCartItemServiceTest {
     @Mock
-    private HttpSession session;
+    private GuestCartRedisRepository guestCartRedisRepository;
     @InjectMocks
     private GuestCartItemService guestCartItemService;
 
-    @Test // 게스트 카트가 비어있는 경우(게스트 카트 새로 생성)
+    @Test
     void addGuestCartItem_WhenGuestCartIsNull() {
         // given
-        CartItemRequest request = new CartItemRequest(1L, 2L);
-        given(session.getAttribute("guestCart")).willReturn(null);
-        given(session.getId()).willReturn("test-session-id");
+        String cartId = "test-cart-id";
+        CartItemRequest request = new CartItemRequest("1", 2L);
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(null);
+        
         // when
-        GuestCartItemResponse response = guestCartItemService.addGuestCartItem(session, request);
+        CartItemResponse response = guestCartItemService.addGuestCartItem(cartId, request);
+        
         // then
-        assertEquals(1L, response.getBookId());
+        assertEquals("1", response.getIsbn());
         assertEquals(2L, response.getQuantity());
 
-        // session.setAttribute 호출 검증
-        ArgumentCaptor<GuestCart> captor = ArgumentCaptor.forClass(GuestCart.class);
-        verify(session).setAttribute(eq("guestCart"), captor.capture());
+        // Redis 저장 검증
+        ArgumentCaptor<RedisGuestCartDto> captor = ArgumentCaptor.forClass(RedisGuestCartDto.class);
+        verify(guestCartRedisRepository).save(captor.capture());
 
-        GuestCart storedCart = captor.getValue();
-        assertEquals("test-session-id", storedCart.getSessionId());
+        RedisGuestCartDto storedCart = captor.getValue();
+        assertEquals(cartId, storedCart.getCartId());
         assertEquals(1, storedCart.getItems().size());
-        assertEquals(1L, storedCart.getItems().get(0).getBookId());
+        assertEquals("1", storedCart.getItems().get(0).getIsbn());
     }
 
     @Test
     void addGuestCartItem_WhenItemAlreadyExists() {
         // given
-        GuestCartItem existingItem = new GuestCartItem(1L, 1L);
-        GuestCart guestCart = new GuestCart("session-id", new ArrayList<>(List.of(existingItem)));
+        String cartId = "test-cart-id";
+        RedisGuestCartItemDto existingItem = new RedisGuestCartItemDto("1", 1L);
+        RedisGuestCartDto guestCart = new RedisGuestCartDto(cartId, new ArrayList<>(List.of(existingItem)));
 
-        CartItemRequest request = new CartItemRequest(1L, 5L);
-        given(session.getAttribute("guestCart")).willReturn(guestCart);
+        CartItemRequest request = new CartItemRequest("1", 5L);
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(guestCart);
 
         // when
-        GuestCartItemResponse response = guestCartItemService.addGuestCartItem(session, request);
+        CartItemResponse response = guestCartItemService.addGuestCartItem(cartId, request);
 
         // then
-        assertEquals(1L, response.getBookId());
+        assertEquals("1", response.getIsbn());
         assertEquals(5L, response.getQuantity());
 
-        ArgumentCaptor<GuestCart> captor = ArgumentCaptor.forClass(GuestCart.class);
-        verify(session).setAttribute(eq("guestCart"), captor.capture());
+        ArgumentCaptor<RedisGuestCartDto> captor = ArgumentCaptor.forClass(RedisGuestCartDto.class);
+        verify(guestCartRedisRepository).save(captor.capture());
 
-        GuestCart storedCart = captor.getValue();
+        RedisGuestCartDto storedCart = captor.getValue();
         assertEquals(1, storedCart.getItems().size());
         assertEquals(5L, storedCart.getItems().get(0).getQuantity());
     }
 
     @Test
-    void getGuestCartItemByBookId_WhenGuestCartIsNull() {
+    void getGuestCartItemByIsbn_WhenGuestCartIsNull() {
         // given
-        given(session.getAttribute("guestCart")).willReturn(null);
-        given(session.getId()).willReturn("test-session-id");
+        String cartId = "test-cart-id";
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(null);
 
-        // when
+        // when & then
         assertThrows(CartNotFoundException.class, () ->
-                guestCartItemService.getGuestCartItemByBookId(session, 1L));
+                guestCartItemService.getGuestCartItemByIsbn(cartId, "1"));
     }
 
     @Test
-    void getGuestCartItemByBookId_WhenBookNotFound() {
+    void getGuestCartItemByIsbn_WhenBookNotFound() {
         // given
-        GuestCart guestCart = new GuestCart("session-id", List.of(new GuestCartItem(2L, 3L)));
-        given(session.getAttribute("guestCart")).willReturn(guestCart);
-        // when
+        String cartId = "test-cart-id";
+        RedisGuestCartDto guestCart = new RedisGuestCartDto(cartId, List.of(new RedisGuestCartItemDto("2", 3L)));
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(guestCart);
+        
+        // when & then
         assertThrows(CartItemNotFoundException.class, () ->
-                guestCartItemService.getGuestCartItemByBookId(session, 1L));
+                guestCartItemService.getGuestCartItemByIsbn(cartId, "1"));
     }
 
     @Test
-    void getGuestCartItemByBookId_WhenBookExists() {
+    void getGuestCartItemByIsbn_WhenBookExists() {
         // given
-        GuestCart guestCart = new GuestCart("session-id", List.of(new GuestCartItem(1L, 3L)));
-        given(session.getAttribute("guestCart")).willReturn(guestCart);
+        String cartId = "test-cart-id";
+        RedisGuestCartDto guestCart = new RedisGuestCartDto(cartId, List.of(new RedisGuestCartItemDto("1", 3L)));
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(guestCart);
+        
         // when
-        GuestCartItemResponse response = guestCartItemService.getGuestCartItemByBookId(session, 1L);
+        CartItemResponse response = guestCartItemService.getGuestCartItemByIsbn(cartId, "1");
+        
         // then
-        assertEquals(1L, response.getBookId());
+        assertEquals("1", response.getIsbn());
         assertEquals(3L, response.getQuantity());
     }
 
     @Test
     void updateQuantity_WhenGuestCartIsNull() {
         // given
-        CartItemRequest request = new CartItemRequest(1L, 2L);
-        given(session.getAttribute("guestCart")).willReturn(null);
-        given(session.getId()).willReturn("test-session-id");
+        String cartId = "test-cart-id";
+        CartItemRequest request = new CartItemRequest("1", 2L);
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(null);
 
-        // when
+        // when & then
         assertThrows(CartNotFoundException.class, () ->
-                guestCartItemService.updateQuantity(session, request));
+                guestCartItemService.updateQuantity(cartId, request));
     }
 
     @Test
     void updateQuantity_WhenBookNotFound() {
         // given
-        CartItemRequest request = new CartItemRequest(1L, 2L);
-        GuestCart guestCart = new GuestCart("session-id", List.of(new GuestCartItem(2L, 3L)));
-        given(session.getAttribute("guestCart")).willReturn(guestCart);
-        // when
+        String cartId = "test-cart-id";
+        CartItemRequest request = new CartItemRequest("1", 2L);
+        RedisGuestCartDto guestCart = new RedisGuestCartDto(cartId, List.of(new RedisGuestCartItemDto("2", 3L)));
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(guestCart);
+        
+        // when & then
         assertThrows(CartItemNotFoundException.class, () ->
-                guestCartItemService.updateQuantity(session, request));
+                guestCartItemService.updateQuantity(cartId, request));
     }
 
     @Test
     void updateQuantity_WhenBookExists() {
         // given
-        Long bookId = 1L;
+        String cartId = "test-cart-id";
+        String isbn = "1";
         Long newQuantity = 10L;
 
-        GuestCartItem cartItem = new GuestCartItem(bookId, 3L);
-        GuestCart guestCart = new GuestCart("session-id", new ArrayList<>(List.of(cartItem)));
+        RedisGuestCartItemDto cartItem = new RedisGuestCartItemDto(isbn, 3L);
+        RedisGuestCartDto guestCart = new RedisGuestCartDto(cartId, new ArrayList<>(List.of(cartItem)));
 
-        given(session.getAttribute("guestCart")).willReturn(guestCart);
-        CartItemRequest request = new CartItemRequest(bookId, newQuantity);
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(guestCart);
+        CartItemRequest request = new CartItemRequest(isbn, newQuantity);
 
         // when
-        GuestCartItemResponse response = guestCartItemService.updateQuantity(session, request);
+        CartItemResponse response = guestCartItemService.updateQuantity(cartId, request);
 
         // then
-        assertEquals(bookId, response.getBookId());
+        assertEquals(isbn, response.getIsbn());
         assertEquals(newQuantity, response.getQuantity());
 
-        ArgumentCaptor<GuestCart> captor = ArgumentCaptor.forClass(GuestCart.class);
-        verify(session).setAttribute(eq("guestCart"), captor.capture());
+        ArgumentCaptor<RedisGuestCartDto> captor = ArgumentCaptor.forClass(RedisGuestCartDto.class);
+        verify(guestCartRedisRepository).save(captor.capture());
 
-        GuestCart updatedCart = captor.getValue();
+        RedisGuestCartDto updatedCart = captor.getValue();
         assertEquals(1, updatedCart.getItems().size());
         assertEquals(newQuantity, updatedCart.getItems().get(0).getQuantity());
     }
 
-
     @Test
     void deleteGuestCartItem_WhenGuestCartIsNull() {
         // given
-        given(session.getAttribute("guestCart")).willReturn(null);
-        given(session.getId()).willReturn("test-session-id");
-        // when
+        String cartId = "test-cart-id";
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(null);
+        
+        // when & then
         assertThrows(CartNotFoundException.class, () ->
-                guestCartItemService.deleteGuestCartItem(session, 1L));
+                guestCartItemService.deleteGuestCartItem(cartId, "1"));
     }
 
     @Test
     void deleteGuestCartItem_WhenBookNotFound() {
         // given
-        GuestCart guestCart = new GuestCart("session-id", new ArrayList<>(List.of(new GuestCartItem(2L, 3L))));
-        given(session.getAttribute("guestCart")).willReturn(guestCart);
-        // when
+        String cartId = "test-cart-id";
+        RedisGuestCartDto guestCart = new RedisGuestCartDto(cartId, new ArrayList<>(List.of(new RedisGuestCartItemDto("2", 3L))));
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(guestCart);
+        
+        // when & then
         assertThrows(CartItemNotFoundException.class, () ->
-                guestCartItemService.deleteGuestCartItem(session, 1L));
+                guestCartItemService.deleteGuestCartItem(cartId, "1"));
     }
 
     @Test
     void deleteGuestCartItem_WhenBookExists() {
         // given
-        GuestCart guestCart = new GuestCart("session-id", new ArrayList<>(List.of(new GuestCartItem(2L, 3L))));
-        given(session.getAttribute("guestCart")).willReturn(guestCart);
+        String cartId = "test-cart-id";
+        RedisGuestCartDto guestCart = new RedisGuestCartDto(cartId, new ArrayList<>(List.of(new RedisGuestCartItemDto("2", 3L))));
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(guestCart);
+        
         // when
-        guestCartItemService.deleteGuestCartItem(session, 2L);
+        guestCartItemService.deleteGuestCartItem(cartId, "2");
+        
         // then
-        ArgumentCaptor<GuestCart> captor = ArgumentCaptor.forClass(GuestCart.class);
-        verify(session).setAttribute(eq("guestCart"), captor.capture());
+        ArgumentCaptor<RedisGuestCartDto> captor = ArgumentCaptor.forClass(RedisGuestCartDto.class);
+        verify(guestCartRedisRepository).save(captor.capture());
 
-        GuestCart updatedCart = captor.getValue();
+        RedisGuestCartDto updatedCart = captor.getValue();
         assertTrue(updatedCart.getItems().isEmpty(), "장바구니 아이템이 삭제되어야 함");
     }
 
     @Test
     void deleteAllGuestCartItems(){
         // given
-        GuestCart guestCart = new GuestCart("session-id", new ArrayList<>(List.of(new GuestCartItem(2L, 3L))));
-        given(session.getAttribute("guestCart")).willReturn(guestCart);
+        String cartId = "test-cart-id";
+        RedisGuestCartDto guestCart = new RedisGuestCartDto(cartId, new ArrayList<>(List.of(new RedisGuestCartItemDto("2", 3L))));
+        given(guestCartRedisRepository.findByCartId(cartId)).willReturn(guestCart);
+        
         // when
-        guestCartItemService.deleteAllGuestCartItems(session);
+        guestCartItemService.deleteAllGuestCartItems(cartId);
+        
         // then
-        ArgumentCaptor<GuestCart> captor = ArgumentCaptor.forClass(GuestCart.class);
-        verify(session).setAttribute(eq("guestCart"), captor.capture());
+        ArgumentCaptor<RedisGuestCartDto> captor = ArgumentCaptor.forClass(RedisGuestCartDto.class);
+        verify(guestCartRedisRepository).save(captor.capture());
 
-        GuestCart updatedGuestCart = captor.getValue();
+        RedisGuestCartDto updatedGuestCart = captor.getValue();
         assertNotNull(updatedGuestCart);
         assertTrue(updatedGuestCart.getItems().isEmpty());
     }
-
 }

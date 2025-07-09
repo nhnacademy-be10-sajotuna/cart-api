@@ -1,5 +1,6 @@
 package com.dooray.bookstorecarts.repository;
 
+
 import com.dooray.bookstorecarts.entity.Cart;
 import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.entity.QCartItem;
@@ -18,13 +19,12 @@ public class UserCartItemRepositoryImpl extends QuerydslRepositorySupport implem
     }
 
     @Override
-    public CartItem findByCartAndBookId(Cart cart, String bookId) {
+    public CartItem findByCartAndIsbn(Cart cart, String isbn) {
         QCartItem cartItem = QCartItem.cartItem;
-
         return queryFactory
                 .selectFrom(cartItem)
                 .where(cartItem.cart.eq(cart)
-                        .and(cartItem.bookId.eq(String.valueOf(bookId))))
+                        .and(cartItem.isbn.eq(String.valueOf(isbn))))
                 .fetchOne();
     }
 }

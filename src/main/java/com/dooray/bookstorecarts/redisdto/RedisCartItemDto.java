@@ -14,14 +14,22 @@ public class RedisCartItemDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long cartItemId;
-    private String bookId;
+    private String isbn;
     private Long quantity;
 
     public static RedisCartItemDto from(CartItem item) {
         return new RedisCartItemDto(
                 item.getId(),
-                item.getBookId(),
+                item.getIsbn(),
                 item.getQuantity()
         );
+    }
+
+    public CartItem toEntity() {
+        CartItem item = new CartItem();
+        item.setId(this.cartItemId);
+        item.setIsbn(this.isbn);
+        item.setQuantity(this.quantity);
+        return item;
     }
 }

@@ -1,7 +1,6 @@
 package com.dooray.bookstorecarts.service;
 
 import com.dooray.bookstorecarts.exception.CartNotFoundException;
-import com.dooray.bookstorecarts.feign.BookFeignClient;
 import com.dooray.bookstorecarts.redisdto.RedisGuestCartDto;
 import com.dooray.bookstorecarts.repository.GuestCartRedisRepository;
 import com.dooray.bookstorecarts.response.CartResponse;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 public class GuestCartService {
 
     private final GuestCartRedisRepository guestCartRedisRepository;
-    private final BookFeignClient bookFeignClient;
+    private final CartResponseService cartResponseService;
 
     public CartResponse getCartByCartId(String cartId) {
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
@@ -24,7 +23,7 @@ public class GuestCartService {
             guestCart = new RedisGuestCartDto(cartId, new ArrayList<>());
         }
 
-        return new CartResponse(guestCart,bookFeignClient);
+        return cartResponseService.createFromGuestCart(guestCart);
     }
 
     public void deleteGuestCart(String cartId) {

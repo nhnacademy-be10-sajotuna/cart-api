@@ -17,4 +17,9 @@ public class Cart {
     @Column(name = "cart_id")
     private Long id;
     private Long userId;
+
+    public Cart(Long id, Long userId) {
+        this.id = id;
+        this.userId = userId;
+    }
 }
