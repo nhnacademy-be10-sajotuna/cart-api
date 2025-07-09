@@ -18,13 +18,13 @@ public class UserCartItemRepositoryImpl extends QuerydslRepositorySupport implem
     }
 
     @Override
-    public CartItem findByCartAndBookId(Cart cart, Long bookId) {
+    public CartItem findByCartAndBookId(Cart cart, String bookId) {
         QCartItem cartItem = QCartItem.cartItem;
 
         return queryFactory
                 .selectFrom(cartItem)
                 .where(cartItem.cart.eq(cart)
-                        .and(cartItem.bookId.eq(bookId)))
+                        .and(cartItem.bookId.eq(String.valueOf(bookId))))
                 .fetchOne();
     }
 }

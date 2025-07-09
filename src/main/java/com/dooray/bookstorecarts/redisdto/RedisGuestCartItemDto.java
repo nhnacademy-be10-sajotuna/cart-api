@@ -9,8 +9,8 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GuestCartItem implements Serializable {
+public class RedisGuestCartItemDto implements Serializable {
     private static final long serialVersionUID = 1L;
-    private Long bookId;
+    private String bookId;
     private Long quantity;
 }

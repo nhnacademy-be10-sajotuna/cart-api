@@ -1,6 +1,6 @@
 package com.dooray.bookstorecarts.controller;
 
-import com.dooray.bookstorecarts.response.UserCartResponse;
+import com.dooray.bookstorecarts.response.CartResponse;
 import com.dooray.bookstorecarts.service.UserCartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,7 @@ public class UserCartController {
     private final UserCartService userCartService;
     // 장바구니 조회(유저의 장바구니 조회 - 모든 아이템 조회)
     @GetMapping
-    public ResponseEntity<UserCartResponse> getUserCart(@RequestHeader(value = "X-User-Id") Long userId){
+    public ResponseEntity<CartResponse> getUserCart(@RequestHeader(value = "X-User-Id") Long userId){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userCartService.getCartByUserId(userId));

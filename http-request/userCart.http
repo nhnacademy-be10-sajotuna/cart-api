@@ -6,7 +6,7 @@ GET https://examples.http-client.intellij.net/get
 GET http://localhost:10370/api/user-carts
 Accept: application/json
 Content-Type: application/json
-X-User-Id: 22
+X-User-Id: 3
 
 ### 장바구니 완전삭제(유저가 회원탈퇴할때 카트가 db에 남지 않도록)
 DELETE http://localhost:10370/api/user-carts
@@ -18,10 +18,10 @@ X-User-Id: 22
 POST http://localhost:10370/api/user-cart-items
 Content-Type: application/json
 Accept: application/json
-X-User-Id: 22
+X-User-Id: 3
 
 {
-  "bookId": 1,
+  "bookId": "9788932900010",
   "quantity": 3
 }
 

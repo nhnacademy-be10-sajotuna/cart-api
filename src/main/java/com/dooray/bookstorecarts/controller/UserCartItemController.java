@@ -1,7 +1,7 @@
 package com.dooray.bookstorecarts.controller;
 
 import com.dooray.bookstorecarts.request.CartItemRequest;
-import com.dooray.bookstorecarts.response.UserCartItemResponse;
+import com.dooray.bookstorecarts.response.CartItemResponse;
 import com.dooray.bookstorecarts.service.UserCartItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +16,15 @@ public class UserCartItemController {
     private final UserCartItemService userCartItemService;
     // 장바구니에 책담기(해당 유저의 장바구니가 없을경우 장바구니 생성)
     @PostMapping
-    public ResponseEntity<UserCartItemResponse> addUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
-                                                                   @Valid @RequestBody CartItemRequest request) {
+    public ResponseEntity<CartItemResponse> addUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
+                                                            @Valid @RequestBody CartItemRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(userCartItemService.addUserCartItem(userId, request));
     }
     // 장바구니 책 단건조회
     @GetMapping("/{cartItemId}")
-    public ResponseEntity<UserCartItemResponse> getUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
+    public ResponseEntity<CartItemResponse> getUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
                                                                 @PathVariable Long cartItemId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -32,7 +32,7 @@ public class UserCartItemController {
     }
     // 장바구니 책 수량 변경
     @PatchMapping("/{cartItemId}")
-    public ResponseEntity<UserCartItemResponse> updateUserCartItem(@PathVariable Long cartItemId,
+    public ResponseEntity<CartItemResponse> updateUserCartItem(@PathVariable Long cartItemId,
                                                                    @Valid @RequestBody CartItemRequest request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
