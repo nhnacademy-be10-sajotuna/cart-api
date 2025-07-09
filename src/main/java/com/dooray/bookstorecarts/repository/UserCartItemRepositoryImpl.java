@@ -1,6 +1,5 @@
 package com.dooray.bookstorecarts.repository;
 
-
 import com.dooray.bookstorecarts.entity.Cart;
 import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.entity.QCartItem;
@@ -23,8 +22,8 @@ public class UserCartItemRepositoryImpl extends QuerydslRepositorySupport implem
         QCartItem cartItem = QCartItem.cartItem;
         return queryFactory
                 .selectFrom(cartItem)
-                .where(cartItem.cart.eq(cart)
-                        .and(cartItem.isbn.eq(String.valueOf(isbn))))
+                .where(cartItem.cart().eq(cart)
+                        .and(cartItem.isbn.eq(isbn)))
                 .fetchOne();
     }
 }
