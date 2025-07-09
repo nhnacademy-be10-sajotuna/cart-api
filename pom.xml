@@ -143,24 +143,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.30</version>
-                        </path>
-                        <path>
-                            <groupId>com.querydsl</groupId>
-                            <artifactId>querydsl-apt</artifactId>
-                            <version>${querydsl.version}</version>
-                            <classifier>jakarta</classifier>
-                        </path>
-                        <path>
-                            <groupId>jakarta.persistence</groupId>
-                            <artifactId>jakarta.persistence-api</artifactId>
-                            <version>3.1.0</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
