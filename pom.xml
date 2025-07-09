@@ -179,7 +179,7 @@
                             <options>
                                <querydsl.entityAccessors>true</querydsl.entityAccessors>
                                <querydsl.createDefaultVariable>true</querydsl.createDefaultVariable>
-                            /options>
+                            </options>
                         </configuration>
                     </execution>
                 </executions>
