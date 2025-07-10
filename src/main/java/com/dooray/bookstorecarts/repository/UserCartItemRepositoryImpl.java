@@ -22,7 +22,7 @@ public class UserCartItemRepositoryImpl extends QuerydslRepositorySupport implem
         QCartItem cartItem = QCartItem.cartItem;
         return queryFactory
                 .selectFrom(cartItem)
-                .where(cartItem.cart.eq(cart)
+                .where(cartItem.cart().eq(cart)
                         .and(cartItem.isbn.eq(isbn)))
                 .fetchOne();
     }
