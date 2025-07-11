@@ -17,5 +17,6 @@ public class BookSummaryResponse {
     private String imageUrl;
     private Double originalPrice;
     private Double sellingPrice;
+    private Boolean giftWrappingAvailable;
     private List<Long> categoryIds;
 }
