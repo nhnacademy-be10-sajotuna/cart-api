@@ -43,21 +43,6 @@ public class GuestCartItemService {
         guestCartRedisRepository.save(guestCart);
     }
 
-    // 회원은 카트아이템(기본키, 오토인크리즈먼트키)로 식별되는데 비회원은 기본키없어서 cart Id와 book id가 둘다 있어야 식별가능
-    public CartItemResponse getGuestCartItemByIsbn(String CartId, String isbn){
-        RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(CartId);
-        if (guestCart == null) {
-            throw new CartNotFoundException(CartId);
-        }
-        for(RedisGuestCartItemDto item : guestCart.getItems()){
-            if(item.getIsbn().equals(isbn)){
-                BookResponse book = bookFeignClient.getBook(item.getIsbn());
-                return new CartItemResponse(item,book);
-            }
-        }
-        throw CartItemNotFoundException.forIsbn(isbn);
-    }
-
 
     public void updateQuantity(String cartId, CartItemRequest request) {
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);

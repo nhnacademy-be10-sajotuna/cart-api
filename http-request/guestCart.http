@@ -12,11 +12,11 @@ DELETE http://localhost:10370/api/guest-carts
 POST http://localhost:10370/api/guest-cart-items
 Content-Type: application/json
 Accept: application/json
-X-Guest-Cart-Id: b86d031d-d674-472a-bee9-2cfe250cc2cf
+X-Guest-Cart-Id: f6f553e3-20c2-4ed9-aaca-0fc614ebe158
 
 {
-  "isbn": "9781492025795",
-  "quantity": 5
+  "isbn": "9781118808573",
+  "quantity": 3
 }
 
 ### 비회원 장바구니 책 단건조회

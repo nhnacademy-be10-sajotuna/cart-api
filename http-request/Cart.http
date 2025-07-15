@@ -6,4 +6,5 @@ GET https://examples.http-client.intellij.net/get
 POST http://localhost:10370/api/carts/merge
 Content-Type: application/json
 Accept: application/json
-X-User-Id: 22
+X-User-Id: 33
+X-Guest-Cart-Id:
