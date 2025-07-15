@@ -34,10 +34,10 @@ public class CartService {
         // 회원이 장바구니 아이템을 한번도 안담았으면 카트가 널이기때문에 카트 새로 생성
         Cart cart = getOrCreateCart(userId);
         // 게스트 카트가 없으면 병합을 건너뛰자 - 기존 유저의 카트만 반환
-        if (guestCart == null) {
+        if (guestCart == null || guestCart.getItems().isEmpty()) { // 비회원 장바구니 페이지 들어가면 빈 장바구니가 생기기때문에
             List<CartItem> items = userCartItemRepository.findByCart(cart);
-            userCartRedisRepository.save(RedisCartDto.from(cart, items));
-            return cartResponseService.createFromUserCart(cart, items);
+            RedisCartDto redisCartDto = RedisCartDto.from(cart, items);
+            return cartResponseService.createFromUserCart(redisCartDto, items);
         }
 
         for (RedisGuestCartItemDto guestCartItem : guestCart.getItems()) {
@@ -47,10 +47,7 @@ public class CartService {
                 cartItem.setQuantity(cartItem.getQuantity() + guestCartItem.getQuantity());
                 userCartItemRepository.save(cartItem);
             }else {
-                CartItem newCartItem = new CartItem();
-                newCartItem.setCart(cart);
-                newCartItem.setIsbn(guestCartItem.getIsbn());
-                newCartItem.setQuantity(guestCartItem.getQuantity());
+                CartItem newCartItem = new CartItem(guestCartItem.getIsbn(),guestCartItem.getQuantity(),cart);
                 userCartItemRepository.save(newCartItem);
             }
         }
@@ -62,8 +59,7 @@ public class CartService {
     private Cart getOrCreateCart(Long userId){
         return userCartRepository.findByUserId(userId)
                 .orElseGet(() -> {
-                    Cart newCart = new Cart();
-                    newCart.setUserId(userId);
+                    Cart newCart = new Cart(userId);
                     Cart savedCart = userCartRepository.save(newCart);
                     userCartRedisRepository.save(RedisCartDto.from(savedCart, Collections.emptyList()));
                     return savedCart;
@@ -72,7 +68,8 @@ public class CartService {
     // 기존 유저 카트를 반환
     private CartResponse getUserCartResponse(Cart cart) {
         List<CartItem> cartItems = userCartItemRepository.findByCart(cart);
-        userCartRedisRepository.save(RedisCartDto.from(cart, cartItems));
-        return cartResponseService.createFromUserCart(cart, cartItems);
+        RedisCartDto redisCartDto = RedisCartDto.from(cart, cartItems);
+        userCartRedisRepository.save(redisCartDto);
+        return cartResponseService.createFromUserCart(redisCartDto, cartItems);
     }
 }

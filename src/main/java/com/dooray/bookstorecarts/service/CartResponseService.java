@@ -5,6 +5,7 @@ import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.feign.BookBatchRequest;
 import com.dooray.bookstorecarts.feign.BookFeignClient;
 import com.dooray.bookstorecarts.feign.BookSummaryResponse;
+import com.dooray.bookstorecarts.redisdto.RedisCartDto;
 import com.dooray.bookstorecarts.redisdto.RedisGuestCartDto;
 import com.dooray.bookstorecarts.redisdto.RedisGuestCartItemDto;
 import com.dooray.bookstorecarts.response.CartItemResponse;
@@ -23,9 +24,9 @@ public class CartResponseService {
     
     private final BookFeignClient bookFeignClient;
     
-    public CartResponse createFromUserCart(Cart cart, List<CartItem> items) {
+    public CartResponse createFromUserCart(RedisCartDto cart, List<CartItem> items) {
         if (items.isEmpty()) {
-            return new CartResponse(String.valueOf(cart.getId()), new ArrayList<>());
+            return new CartResponse(String.valueOf(cart.getCartId()), new ArrayList<>());
         }
         
         List<String> isbns = items.stream()
@@ -40,7 +41,7 @@ public class CartResponseService {
                 .map(item -> new CartItemResponse(item, bookMap.get(item.getIsbn())))
                 .toList();
         
-        return new CartResponse(String.valueOf(cart.getId()), cartItems);
+        return new CartResponse(String.valueOf(cart.getCartId()), cartItems);
     }
     
     public CartResponse createFromGuestCart(RedisGuestCartDto guestCart) {

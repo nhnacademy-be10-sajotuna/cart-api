@@ -1,7 +1,6 @@
 package com.dooray.bookstorecarts.response;
 
 import com.dooray.bookstorecarts.entity.CartItem;
-import com.dooray.bookstorecarts.feign.BookResponse;
 import com.dooray.bookstorecarts.feign.BookSummaryResponse;
 import com.dooray.bookstorecarts.redisdto.RedisGuestCartItemDto;
 import lombok.Data;
@@ -21,20 +20,6 @@ public class CartItemResponse {
     private Boolean giftWrappingAvailable;
     private List<Long> categoryIds;
 
-
-    public CartItemResponse(CartItem cartItem, BookResponse book) {
-        this.cartItemId = cartItem.getId();
-        this.isbn = cartItem.getIsbn();
-        this.quantity = cartItem.getQuantity();
-
-        if(book != null) {
-            this.title = book.getTitle();
-            this.imageUrl = book.getImageUrl();
-            this.originalPrice = book.getOriginalPrice();
-            this.sellingPrice = book.getSellingPrice();
-            this.giftWrappingAvailable = book.getGiftWrappingAvailable();
-        }
-    }
 
     public CartItemResponse(CartItem cartItem, BookSummaryResponse book) {
         this.cartItemId = cartItem.getId();
@@ -63,20 +48,6 @@ public class CartItemResponse {
             this.sellingPrice = book.getSellingPrice();
             this.giftWrappingAvailable = book.getGiftWrappingAvailable();
             this.categoryIds = book.getCategoryIds();
-        }
-    }
-
-    public CartItemResponse(RedisGuestCartItemDto cartItem, BookResponse book) {
-        this.cartItemId = null;
-        this.isbn = cartItem.getIsbn();
-        this.quantity = cartItem.getQuantity();
-
-        if(book != null) {
-            this.title = book.getTitle();
-            this.imageUrl = book.getImageUrl();
-            this.originalPrice = book.getOriginalPrice();
-            this.sellingPrice = book.getSellingPrice();
-            this.giftWrappingAvailable = book.getGiftWrappingAvailable();
         }
     }
 }

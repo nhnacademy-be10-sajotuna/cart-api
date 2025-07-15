@@ -12,9 +12,10 @@ DELETE http://localhost:10370/api/guest-carts
 POST http://localhost:10370/api/guest-cart-items
 Content-Type: application/json
 Accept: application/json
+X-Guest-Cart-Id: f6f553e3-20c2-4ed9-aaca-0fc614ebe158
 
 {
-  "bookId": "9791193132640",
+  "isbn": "9781118808573",
   "quantity": 3
 }
 
@@ -27,7 +28,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "bookId": 1,
+  "isbn": 1,
   "quantity": 5
 }
 

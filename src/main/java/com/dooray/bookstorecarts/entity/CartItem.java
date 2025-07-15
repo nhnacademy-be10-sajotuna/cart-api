@@ -22,4 +22,10 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
+
+    public CartItem(String isbn, Long quantity, Cart cart) {
+        this.isbn = isbn;
+        this.quantity = quantity;
+        this.cart = cart;
+    }
 }
