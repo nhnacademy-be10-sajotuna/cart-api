@@ -17,7 +17,9 @@ public class CartItemResponse {
     private String imageUrl;
     private Double originalPrice;
     private Double sellingPrice;
+    private Boolean giftWrappingAvailable;
     private List<Long> categoryIds;
+
 
     public CartItemResponse(CartItem cartItem, BookSummaryResponse book) {
         this.cartItemId = cartItem.getId();
@@ -29,6 +31,7 @@ public class CartItemResponse {
             this.imageUrl = book.getImageUrl();
             this.originalPrice = book.getOriginalPrice();
             this.sellingPrice = book.getSellingPrice();
+            this.giftWrappingAvailable = book.getGiftWrappingAvailable();
             this.categoryIds = book.getCategoryIds();
         }
     }
@@ -43,6 +46,7 @@ public class CartItemResponse {
             this.imageUrl = book.getImageUrl();
             this.originalPrice = book.getOriginalPrice();
             this.sellingPrice = book.getSellingPrice();
+            this.giftWrappingAvailable = book.getGiftWrappingAvailable();
             this.categoryIds = book.getCategoryIds();
         }
     }
