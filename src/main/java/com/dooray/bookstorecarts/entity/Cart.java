@@ -18,8 +18,7 @@ public class Cart {
     private Long id;
     private Long userId;
 
-    public Cart(Long id, Long userId) {
-        this.id = id;
+    public Cart(Long userId) {
         this.userId = userId;
     }
 }

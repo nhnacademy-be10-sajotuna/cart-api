@@ -20,20 +20,6 @@ public class CartItemResponse {
     private Double sellingPrice;
     private List<Long> categoryIds;
 
-
-    public CartItemResponse(CartItem cartItem, BookResponse book) {
-        this.cartItemId = cartItem.getId();
-        this.isbn = cartItem.getIsbn();
-        this.quantity = cartItem.getQuantity();
-
-        if(book != null) {
-            this.title = book.getTitle();
-            this.imageUrl = book.getImageUrl();
-            this.originalPrice = book.getOriginalPrice();
-            this.sellingPrice = book.getSellingPrice();
-        }
-    }
-
     public CartItemResponse(CartItem cartItem, BookSummaryResponse book) {
         this.cartItemId = cartItem.getId();
         this.isbn = cartItem.getIsbn();

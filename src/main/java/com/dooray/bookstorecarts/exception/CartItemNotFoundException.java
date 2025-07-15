@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public class CartItemNotFoundException extends ApiException {
-    private static final String MESSAGE_CART_ITEM = "카트아이디가 존재하지 않습니다 : ";
+    private static final String MESSAGE_CART_ITEM = "도서가 존재하지 않습니다 : ";
     private static final String MESSAGE_BOOK = "존재하지 않는 책입니다 : ";
 
     // private 생성자 하나만 둠

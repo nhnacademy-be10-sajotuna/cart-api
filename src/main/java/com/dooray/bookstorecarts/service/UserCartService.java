@@ -32,17 +32,21 @@ public class UserCartService {
                     .map(RedisCartItemDto::toEntity)
                     .toList();
 
-            Cart cart = new Cart(redisCart.getCartId(), redisCart.getUserId());
-            return cartResponseService.createFromUserCart(cart, items);
+            return cartResponseService.createFromUserCart(redisCart, items);
         }
 
         Cart cart = userCartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException(userId));
+                .orElseGet(()->{
+                            Cart newCart = new Cart(userId);
+                            userCartRepository.save(newCart);
+                            return newCart;
+                        });
 
         List<CartItem> items = userCartItemRepository.findByCart(cart);
-        userCartRedisRepository.save(RedisCartDto.from(cart, items));
+        RedisCartDto  redisCartDto=  RedisCartDto.from(cart, items);
+        userCartRedisRepository.save(redisCartDto);
 
-        return cartResponseService.createFromUserCart(cart, items);
+        return cartResponseService.createFromUserCart(redisCartDto, items);
     }
 
     public Cart getCartEntityByUserId(Long userId) { // 이 메서드는 무조건 db 에서만 가져오기!!

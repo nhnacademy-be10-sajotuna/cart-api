@@ -21,6 +21,7 @@ public class GuestCartService {
 
         if (guestCart == null) {
             guestCart = new RedisGuestCartDto(cartId, new ArrayList<>());
+            guestCartRedisRepository.save(guestCart);
         }
 
         return cartResponseService.createFromGuestCart(guestCart);

@@ -16,34 +16,27 @@ public class UserCartItemController {
     private final UserCartItemService userCartItemService;
     // 장바구니에 책담기(해당 유저의 장바구니가 없을경우 장바구니 생성)
     @PostMapping
-    public ResponseEntity<CartItemResponse> addUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
-                                                            @Valid @RequestBody CartItemRequest request) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(userCartItemService.addUserCartItem(userId, request));
+    public ResponseEntity<Void> addUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
+                                                @Valid @RequestBody CartItemRequest request) {
+        userCartItemService.addUserCartItem(userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-    // 장바구니 책 단건조회
-    @GetMapping("/{cartItemId}")
-    public ResponseEntity<CartItemResponse> getUserCartItem(@RequestHeader(value = "X-User-Id") Long userId,
-                                                                @PathVariable Long cartItemId) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userCartItemService.getCartItemByCartItemId(userId,cartItemId));
-    }
+    // 장바구니 책 단건 조회 ( 필요없어서 삭제 )
     // 장바구니 책 수량 변경
-    @PatchMapping("/{cartItemId}")
-    public ResponseEntity<CartItemResponse> updateUserCartItem(@PathVariable Long cartItemId,
+    @PostMapping("/update/{cartItemId}")
+    public ResponseEntity<Void> updateUserCartItem(@PathVariable Long cartItemId,
                                                                    @Valid @RequestBody CartItemRequest request) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userCartItemService.updateQuantity(cartItemId, request));
+        userCartItemService.updateQuantity(cartItemId, request);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
+
     // 장바구니 책 삭제(단건 삭제)
     @DeleteMapping("/{cartItemId}")
     public ResponseEntity<Void> deleteUserCartItem(@PathVariable Long cartItemId) {
         userCartItemService.deleteCartItem(cartItemId);
         return ResponseEntity.noContent().build();
     }
+
     // 장바구니 비우기
     @DeleteMapping
     public ResponseEntity<Void> clearUserCartItems(@RequestHeader(value = "X-User-Id") Long userId) {

@@ -5,15 +5,11 @@ import com.dooray.bookstorecarts.entity.CartItem;
 import com.dooray.bookstorecarts.exception.CartItemNotFoundException;
 import com.dooray.bookstorecarts.exception.CartNotFoundException;
 import com.dooray.bookstorecarts.exception.InvalidException;
-import com.dooray.bookstorecarts.feign.BookFeignClient;
-import com.dooray.bookstorecarts.feign.BookResponse;
 import com.dooray.bookstorecarts.redisdto.RedisCartDto;
-import com.dooray.bookstorecarts.redisdto.RedisCartItemDto;
 import com.dooray.bookstorecarts.repository.UserCartItemRepository;
 import com.dooray.bookstorecarts.repository.UserCartRedisRepository;
 import com.dooray.bookstorecarts.repository.UserCartRepository;
 import com.dooray.bookstorecarts.request.CartItemRequest;
-import com.dooray.bookstorecarts.response.CartItemResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,10 +24,9 @@ public class UserCartItemService {
     private final UserCartRepository userCartRepository;
     private final UserCartItemRepository userCartItemRepository;
     private final UserCartRedisRepository userCartRedisRepository;
-    private final BookFeignClient bookFeignClient;
 
     @Transactional
-    public CartItemResponse addUserCartItem(Long userId, CartItemRequest request) {
+    public void addUserCartItem(Long userId, CartItemRequest request) {
         Cart cart = userCartRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
@@ -44,79 +39,25 @@ public class UserCartItemService {
         // 같은 책이 이미 있으면 요청한 수량으로 새로 설정(예스 24가 그럼)
         CartItem existingItem = userCartItemRepository.findByCartAndIsbn(cart, request.getIsbn());
         if (existingItem != null) {
+            // 이미 있으면 수량만 변경
             existingItem.setQuantity(request.getQuantity());
-            CartItem savedItem = userCartItemRepository.save(existingItem);
-
-            List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
-            userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
-
-            BookResponse book = bookFeignClient.getBook(savedItem.getIsbn());
-            return new CartItemResponse(savedItem, book);
+            userCartItemRepository.save(existingItem);
+        } else {
+            // 없으면 새로 추가
+            CartItem newCartItem = new CartItem();
+            newCartItem.setIsbn(request.getIsbn());
+            newCartItem.setQuantity(request.getQuantity());
+            newCartItem.setCart(cart);
+            userCartItemRepository.save(newCartItem);
         }
 
-        // 새로운 책이면 카트 아이템 추가
-        CartItem newCartItem = new CartItem();
-        newCartItem.setIsbn(request.getIsbn());
-        newCartItem.setQuantity(request.getQuantity());
-        newCartItem.setCart(cart);
-        CartItem savedItem = userCartItemRepository.save(newCartItem);
-
+        // Redis 업데이트는 무조건 한 번만
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
-
-        BookResponse book = bookFeignClient.getBook(savedItem.getIsbn());
-        return new CartItemResponse(savedItem,book);
-    }
-
-
-    public CartItemResponse getCartItemByCartItemId(Long userId, Long cartItemId) {
-        RedisCartDto redisCart = userCartRedisRepository.findByUserId(userId);
-
-        if (redisCart != null) {
-            for (RedisCartItemDto itemDto : redisCart.getItems()) {
-                if (itemDto.getCartItemId().equals(cartItemId)) {
-                    CartItem cartItem = new CartItem();
-                    cartItem.setId(itemDto.getCartItemId());
-                    cartItem.setIsbn(itemDto.getIsbn());
-                    cartItem.setQuantity(itemDto.getQuantity());
-                    BookResponse book = bookFeignClient.getBook(itemDto.getIsbn());
-                    return new CartItemResponse(cartItem,book);
-                }
-            }
-        }
-
-        CartItem cartItem = userCartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> CartItemNotFoundException.forCartItemId(cartItemId));
-
-        Cart cart = cartItem.getCart();
-        List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
-        userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
-        BookResponse book = bookFeignClient.getBook(cartItem.getIsbn());
-        return new CartItemResponse(cartItem,book);
-    }
-
-    public List<CartItem> getCartItemsByUserId(Long userId){
-        RedisCartDto redisCart = userCartRedisRepository.findByUserId(userId);
-        if (redisCart != null) {
-            return redisCart.getItems().stream()
-                    .map(dto -> {
-                        CartItem item = new CartItem();
-                        item.setId(dto.getCartItemId());
-                        item.setIsbn(dto.getIsbn());
-                        item.setQuantity(dto.getQuantity());
-                        return item;
-                    })
-                    .collect(Collectors.toList());
-        }
-        Cart cart = userCartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException(userId));
-        List<CartItem> items = userCartItemRepository.findByCart(cart);
-        userCartRedisRepository.save(RedisCartDto.from(cart, items));
-        return items;
     }
 
     @Transactional
-    public CartItemResponse updateQuantity(Long cartItemId, CartItemRequest request) {
+    public void updateQuantity(Long cartItemId, CartItemRequest request) {
         CartItem cartItem = userCartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> CartItemNotFoundException.forCartItemId(cartItemId));
 
@@ -125,14 +66,12 @@ public class UserCartItemService {
         }
 
         cartItem.setQuantity(request.getQuantity());
-        CartItem updatedCartItem = userCartItemRepository.save(cartItem);
+        userCartItemRepository.save(cartItem);
 
         Cart cart = cartItem.getCart();
         List<CartItem> updatedItems = userCartItemRepository.findByCart(cart);
 
         userCartRedisRepository.save(RedisCartDto.from(cart, updatedItems));
-        BookResponse book = bookFeignClient.getBook(cartItem.getIsbn());
-        return new CartItemResponse(updatedCartItem,book);
     }
 
     @Transactional
@@ -156,5 +95,26 @@ public class UserCartItemService {
                 .orElseThrow(() -> new CartNotFoundException(userId));
 
         userCartRedisRepository.save(RedisCartDto.from(cart, Collections.emptyList()));
+    }
+
+    // 장바구니 아이템 조회 ( 장바구니 비우기 기능 쓸때 필요 )
+    public List<CartItem> getCartItemsByUserId(Long userId){
+        RedisCartDto redisCart = userCartRedisRepository.findByUserId(userId);
+        if (redisCart != null) {
+            return redisCart.getItems().stream()
+                    .map(dto -> {
+                        CartItem item = new CartItem();
+                        item.setId(dto.getCartItemId());
+                        item.setIsbn(dto.getIsbn());
+                        item.setQuantity(dto.getQuantity());
+                        return item;
+                    })
+                    .collect(Collectors.toList());
+        }
+        Cart cart = userCartRepository.findByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException(userId));
+        List<CartItem> items = userCartItemRepository.findByCart(cart);
+        userCartRedisRepository.save(RedisCartDto.from(cart, items));
+        return items;
     }
 }

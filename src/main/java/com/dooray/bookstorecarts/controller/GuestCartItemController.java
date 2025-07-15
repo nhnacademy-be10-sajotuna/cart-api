@@ -16,35 +16,28 @@ public class GuestCartItemController {
     private final GuestCartItemService guestCartItemService;
     // 비회원 장바구니에 책담기(해당세션의 장바구니가 없을경우 장바구니 생성)
     @PostMapping
-    public ResponseEntity<CartItemResponse> addGuestCartItem(@Valid @RequestBody CartItemRequest request,
-                                                             @RequestHeader(value = "X-Guest-Cart-Id") String cartId) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(guestCartItemService.addGuestCartItem(cartId, request));
+    public ResponseEntity<Void> addGuestCartItem(@RequestHeader(value = "X-Guest-Cart-Id") String cartId,
+                                                 @Valid @RequestBody CartItemRequest request) {
+        guestCartItemService.addGuestCartItem(cartId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-    // 비회원 장바구니 책 단건조회
-    @GetMapping("/{bookId}")
-    public ResponseEntity<CartItemResponse> getGuestCartItem(@PathVariable String bookId,
-                                                             @RequestHeader(value = "X-Guest-Cart-Id") String cartId) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(guestCartItemService.getGuestCartItemByIsbn(cartId, bookId));
-    }
+    // 비회원 장바구니 책 단건조회 - 필요없음
     // 비회원 장바구니 책 수량 변경
-    @PatchMapping
-    public ResponseEntity<CartItemResponse> updateGuestCartItem(@Valid @RequestBody CartItemRequest request,
-                                                                @RequestHeader(value = "X-Guest-Cart-Id") String cartId) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(guestCartItemService.updateQuantity(cartId, request));
+    @PostMapping("/update")
+    public ResponseEntity<Void> updateGuestCartItem(@RequestHeader(value = "X-Guest-Cart-Id") String cartId,
+                                                    @Valid @RequestBody CartItemRequest request) {
+        guestCartItemService.updateQuantity(cartId, request);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
+
     // 비회원 장바구니 책 삭제(단건 삭제)
     @DeleteMapping("/{bookId}")
-    public ResponseEntity<Void> deleteGuestCartItem(@PathVariable String bookId,
-                                                    @RequestHeader(value = "X-Guest-Cart-Id") String cartId) {
+    public ResponseEntity<Void> deleteGuestCartItem(@RequestHeader(value = "X-Guest-Cart-Id") String cartId,
+                                                    @PathVariable String bookId) {
         guestCartItemService.deleteGuestCartItem(cartId, bookId);
         return ResponseEntity.noContent().build();
     }
+
     // 비회원 장바구니 비우기
     @DeleteMapping
     public ResponseEntity<Void>  clearGuestCartItems(@RequestHeader(value = "X-Guest-Cart-Id") String cartId) {

@@ -16,7 +16,6 @@ public class GuestCartController {
     // 장바구니 조회(비회원 장바구니 조회 - 모든 아이템 조회)
     @GetMapping
     public ResponseEntity<CartResponse> getGuestCart(@RequestHeader(value = "X-Guest-Cart-Id") String cartId) {
-        System.out.println(cartId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(guestCartService.getCartByCartId(cartId));

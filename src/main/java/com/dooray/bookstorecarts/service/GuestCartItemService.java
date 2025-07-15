@@ -20,19 +20,18 @@ public class GuestCartItemService {
     private final GuestCartRedisRepository guestCartRedisRepository;
     private final BookFeignClient bookFeignClient;
 
-    public CartItemResponse addGuestCartItem(String cartId, CartItemRequest request) {
+    public void addGuestCartItem(String cartId, CartItemRequest request) {
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
         if (guestCart == null) {
             guestCart = new RedisGuestCartDto(cartId, new ArrayList<>());
+            guestCartRedisRepository.save(guestCart);
         }
 
         for (RedisGuestCartItemDto existingItem : guestCart.getItems()) {
             if (existingItem.getIsbn().equals(request.getIsbn())) {
                 existingItem.setQuantity(request.getQuantity());
                 guestCartRedisRepository.save(guestCart);
-
-                BookResponse book = bookFeignClient.getBook(existingItem.getIsbn());
-                return new CartItemResponse(existingItem,book);
+                return;
             }
         }
 
@@ -42,8 +41,6 @@ public class GuestCartItemService {
         guestCart.getItems().add(newItem);
 
         guestCartRedisRepository.save(guestCart);
-        BookResponse book = bookFeignClient.getBook(newItem.getIsbn());
-        return new CartItemResponse(newItem, book);
     }
 
     // 회원은 카트아이템(기본키, 오토인크리즈먼트키)로 식별되는데 비회원은 기본키없어서 cart Id와 book id가 둘다 있어야 식별가능
@@ -62,7 +59,7 @@ public class GuestCartItemService {
     }
 
 
-    public CartItemResponse updateQuantity(String cartId, CartItemRequest request) {
+    public void updateQuantity(String cartId, CartItemRequest request) {
         RedisGuestCartDto guestCart = guestCartRedisRepository.findByCartId(cartId);
         if (guestCart == null) {
             throw new CartNotFoundException(cartId);
@@ -79,8 +76,6 @@ public class GuestCartItemService {
         if (guestCartItem == null) throw  CartItemNotFoundException.forIsbn(request.getIsbn());
         guestCartItem.setQuantity(request.getQuantity());
         guestCartRedisRepository.save(guestCart);
-        BookResponse book = bookFeignClient.getBook(guestCartItem.getIsbn());
-        return new CartItemResponse(guestCartItem, book);
     }
 
     public void deleteGuestCartItem(String cartId, String isbn) {
