@@ -36,3 +36,5 @@ build/
 application-dev.yml
 application-local.yml
 
+### Log files ###
+logs/**
