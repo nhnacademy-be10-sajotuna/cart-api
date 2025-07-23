@@ -31,10 +31,10 @@ public class GuestCartItemController {
     }
 
     // 비회원 장바구니 책 삭제(단건 삭제)
-    @DeleteMapping("/{bookId}")
+    @DeleteMapping("/{isbn}")
     public ResponseEntity<Void> deleteGuestCartItem(@RequestHeader(value = "X-Guest-Cart-Id") String cartId,
-                                                    @PathVariable String bookId) {
-        guestCartItemService.deleteGuestCartItem(cartId, bookId);
+                                                    @PathVariable String isbn) {
+        guestCartItemService.deleteGuestCartItem(cartId, isbn);
         return ResponseEntity.noContent().build();
     }
 
